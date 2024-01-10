@@ -66,7 +66,7 @@ private fun ListView(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
     ) {
-        items(100) { index ->
+        items(50) { index ->
             Button(onClick = { }) {
                 Text(text = index.toString())
             }

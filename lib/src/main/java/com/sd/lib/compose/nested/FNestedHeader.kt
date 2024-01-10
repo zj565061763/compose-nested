@@ -12,10 +12,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEvent
+import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.SubcomposeLayout
-import com.sd.lib.compose.gesture.fConsumePositionChanged
-import com.sd.lib.compose.gesture.fHasConsumed
 import com.sd.lib.compose.gesture.fPointer
+import kotlin.math.absoluteValue
 
 @Composable
 fun FNestedHeader(
@@ -80,18 +82,24 @@ private fun HeaderBox(
                 calculatePan = true
             },
             onCalculate = {
-                if (!currentEvent.fHasConsumed()) {
+                if (currentEvent.changes.any { it.positionChanged() }) {
                     val y = this.pan.y
+
+                    if (this.pan.x.absoluteValue >= y.absoluteValue) {
+                        cancelPointer()
+                        return@fPointer
+                    }
+
                     when {
                         y > 0 -> {
                             if (state.dispatchShow(y)) {
-                                currentEvent.fConsumePositionChanged()
+                                currentEvent.fConsume { it.positionChanged() }
                             }
                         }
 
                         y < 0 -> {
                             if (state.dispatchHide(y)) {
-                                currentEvent.fConsumePositionChanged()
+                                currentEvent.fConsume { it.positionChanged() }
                             }
                         }
                     }
@@ -159,4 +167,17 @@ private class NestedState {
         }
         return false
     }
+}
+
+fun PointerEvent.fConsume(
+    predicate: (PointerInputChange) -> Boolean,
+): Boolean {
+    var consume = false
+    changes.forEach {
+        if (predicate(it)) {
+            it.consume()
+            consume = true
+        }
+    }
+    return consume
 }
