@@ -13,6 +13,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.SubcomposeLayout
+import com.sd.lib.compose.gesture.fConsumePositionChanged
+import com.sd.lib.compose.gesture.fHasConsumed
 import com.sd.lib.compose.gesture.fPointer
 
 @Composable
@@ -76,6 +78,24 @@ private fun HeaderBox(
         modifier = Modifier.fPointer(
             onStart = {
                 calculatePan = true
+            },
+            onCalculate = {
+                if (!currentEvent.fHasConsumed()) {
+                    val y = this.pan.y
+                    when {
+                        y > 0 -> {
+                            if (state.dispatchShow(y)) {
+                                currentEvent.fConsumePositionChanged()
+                            }
+                        }
+
+                        y < 0 -> {
+                            if (state.dispatchHide(y)) {
+                                currentEvent.fConsumePositionChanged()
+                            }
+                        }
+                    }
+                }
             },
         )
     ) {
