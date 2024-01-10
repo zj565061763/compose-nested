@@ -76,16 +76,19 @@ private fun HeaderBox(
     state: NestedState,
     header: @Composable () -> Unit,
 ) {
+    var isDrag by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier.fPointer(
             onStart = {
+                isDrag = false
                 calculatePan = true
             },
             onCalculate = {
                 if (currentEvent.changes.any { it.positionChanged() }) {
                     val y = this.pan.y
 
-                    if (this.pan.x.absoluteValue >= y.absoluteValue) {
+                    if (!isDrag && this.pan.x.absoluteValue >= y.absoluteValue) {
                         cancelPointer()
                         return@fPointer
                     }
@@ -93,12 +96,14 @@ private fun HeaderBox(
                     when {
                         y > 0 -> {
                             if (state.dispatchShow(y)) {
+                                isDrag = true
                                 currentEvent.fConsume { it.positionChanged() }
                             }
                         }
 
                         y < 0 -> {
                             if (state.dispatchHide(y)) {
+                                isDrag = true
                                 currentEvent.fConsume { it.positionChanged() }
                             }
                         }
