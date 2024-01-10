@@ -83,6 +83,7 @@ private fun HeaderBox(
             onStart = {
                 isDrag = false
                 calculatePan = true
+                enableVelocity = true
             },
             onCalculate = {
                 if (currentEvent.changes.any { it.positionChanged() }) {
@@ -118,6 +119,12 @@ private fun HeaderBox(
                             }
                         }
                     }
+                }
+            },
+            onUp = {
+                if (isDrag && pointerCount == 1) {
+                    // TODO fling
+                    val velocity = checkNotNull(this.getPointerVelocity(it.id)).y
                 }
             },
         )
