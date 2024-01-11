@@ -138,8 +138,13 @@ private class NestedState(
     var isDrag: Boolean = false
 
     var headerSize: Float = 0f
-    val maxOffset: Float = 0f
+        set(value) {
+            field = value
+            _anim.updateBounds(lowerBound = minOffset, upperBound = maxOffset)
+        }
+
     val minOffset: Float get() = -headerSize
+    val maxOffset: Float = 0f
 
     var offset by mutableFloatStateOf(0f)
     private val _anim = Animatable(0f)
@@ -193,10 +198,7 @@ private class NestedState(
     fun dispatchFling(velocity: Float) {
         if (velocity == 0f) return
         coroutineScope.launch {
-            _anim.apply {
-                snapTo(offset)
-                updateBounds(lowerBound = minOffset, upperBound = maxOffset)
-            }
+            _anim.snapTo(offset)
             _anim.animateDecay(
                 initialVelocity = velocity,
                 animationSpec = exponentialDecay(frictionMultiplier = 2f),
