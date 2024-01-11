@@ -227,27 +227,25 @@ private class NestedState(
     }
 
     fun dispatchFling(velocity: Float) {
-        if (velocity == 0f) return
         coroutineScope.launch {
             val available = Velocity(0f, velocity)
             val consumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
 
-            val left = velocity - consumed.y
-            if (left == 0f) return@launch
-
-            var lastValue = offset
-
-            _anim.snapTo(offset)
-            _anim.animateDecay(
-                initialVelocity = velocity,
-                animationSpec = exponentialDecay(frictionMultiplier = 2f),
-            ) {
-                val delta = value - lastValue
-                lastValue = value
-                headerNestedScrollDispatcher.dispatchScrollY(delta, NestedScrollSource.Fling)
+            val left = available - consumed
+            if (left != Velocity.Zero) {
+                var lastValue = offset
+                _anim.snapTo(offset)
+                _anim.animateDecay(
+                    initialVelocity = left.y,
+                    animationSpec = exponentialDecay(frictionMultiplier = 2f),
+                ) {
+                    val delta = value - lastValue
+                    lastValue = value
+                    headerNestedScrollDispatcher.dispatchScrollY(delta, NestedScrollSource.Fling)
+                }
             }
 
-            headerNestedScrollDispatcher.dispatchPostFling(consumed, available - consumed)
+            headerNestedScrollDispatcher.dispatchPostFling(consumed, left)
         }
     }
 
