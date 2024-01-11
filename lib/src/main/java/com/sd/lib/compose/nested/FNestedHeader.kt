@@ -15,12 +15,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.pointer.PointerEvent
-import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.positionChanged
-import androidx.compose.ui.input.pointer.util.VelocityTracker
-import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.SubcomposeLayout
+import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fPointer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -88,14 +85,11 @@ private fun HeaderBox(
 ) {
     var isDrag by remember { mutableStateOf(false) }
 
-    val velocityTracker by remember { mutableStateOf(VelocityTracker()) }
-
     Box(
         modifier = Modifier.fPointer(
             onStart = {
                 isDrag = false
                 calculatePan = true
-                velocityTracker.resetTracking()
             },
             onCalculate = {
                 if (currentEvent.changes.any { it.positionChanged() }) {
@@ -135,12 +129,12 @@ private fun HeaderBox(
             },
             onMove = {
                 if (isDrag) {
-                    velocityTracker.addPointerInputChange(it)
+                    velocityAdd(it)
                 }
             },
             onUp = {
                 if (isDrag && pointerCount == 1) {
-                    val velocity = velocityTracker.calculateVelocity().y
+                    val velocity = velocityGet(it.id)?.y ?: 0f
                     state.dispatchFling(velocity)
                 }
             },
@@ -236,17 +230,4 @@ private class NestedState(
             }
         }
     }
-}
-
-fun PointerEvent.fConsume(
-    predicate: (PointerInputChange) -> Boolean,
-): Boolean {
-    var consume = false
-    changes.forEach {
-        if (predicate(it)) {
-            it.consume()
-            consume = true
-        }
-    }
-    return consume
 }
