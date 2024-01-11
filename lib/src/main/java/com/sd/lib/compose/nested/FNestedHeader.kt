@@ -1,11 +1,15 @@
 package com.sd.lib.compose.nested
 
+import android.util.Log
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -17,6 +21,8 @@ import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.SubcomposeLayout
 import com.sd.lib.compose.gesture.fPointer
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 @Composable
@@ -25,7 +31,10 @@ fun FNestedHeader(
     header: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
-    val state by remember { mutableStateOf(NestedState()) }
+    val coroutineScope = rememberCoroutineScope()
+    val state by remember(coroutineScope) {
+        mutableStateOf(NestedState(coroutineScope))
+    }
 
     SubcomposeLayout(
         modifier = modifier.nestedScroll(state.nestedScrollConnection)
@@ -123,8 +132,8 @@ private fun HeaderBox(
             },
             onUp = {
                 if (isDrag && pointerCount == 1) {
-                    // TODO fling
                     val velocity = checkNotNull(this.getPointerVelocity(it.id)).y
+                    state.dispatchFling(velocity)
                 }
             },
         )
@@ -138,13 +147,17 @@ private enum class SlotId {
     Content,
 }
 
-private class NestedState {
+private class NestedState(
+    private val coroutineScope: CoroutineScope,
+) {
     var headerSize: Int = 0
 
     val maxOffset: Float = 0f
     val minOffset: Float get() = -headerSize.toFloat()
 
     var offset by mutableFloatStateOf(0f)
+
+    private val _anim = Animatable(offset)
 
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
@@ -168,6 +181,7 @@ private class NestedState {
 
     fun dispatchHide(value: Float): Boolean {
         if (headerSize <= 0) return false
+        cancelAnim()
         if (value < 0) {
             if (offset > minOffset) {
                 val newOffset = offset + value
@@ -180,6 +194,7 @@ private class NestedState {
 
     fun dispatchShow(value: Float): Boolean {
         if (headerSize <= 0) return false
+        cancelAnim()
         if (value > 0) {
             if (offset < maxOffset) {
                 val newOffset = offset + value
@@ -188,6 +203,31 @@ private class NestedState {
             }
         }
         return false
+    }
+
+    fun dispatchFling(velocity: Float) {
+        if (velocity == 0f) return
+        coroutineScope.launch {
+            Log.i("FNestedHeader", "offset:$offset velocity:$velocity")
+            _anim.apply {
+                snapTo(offset)
+                updateBounds(lowerBound = minOffset, upperBound = maxOffset)
+            }
+            _anim.animateDecay(
+                initialVelocity = velocity,
+                animationSpec = exponentialDecay(),
+            ) {
+                offset = value
+            }
+        }
+    }
+
+    private fun cancelAnim() {
+        if (_anim.isRunning) {
+            coroutineScope.launch {
+                _anim.stop()
+            }
+        }
     }
 }
 
