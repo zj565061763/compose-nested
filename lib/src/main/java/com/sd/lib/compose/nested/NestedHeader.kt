@@ -80,17 +80,15 @@ private fun HeaderBox(
     state: NestedState,
     header: @Composable () -> Unit,
 ) {
-    var isDrag by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier.fPointer(
             onStart = {
-                isDrag = false
+                state.isDrag = false
                 calculatePan = true
             },
             onCalculate = {
                 if (currentEvent.changes.any { it.positionChanged() }) {
-                    if (!isDrag) {
+                    if (!state.isDrag) {
                         if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
                             cancelPointer()
                             return@fPointer
@@ -99,7 +97,7 @@ private fun HeaderBox(
 
                     val centroidY = this.centroid.y
                     if (centroidY >= 0 && centroidY < this.size.height) {
-                        isDrag = true
+                        state.isDrag = true
                         val y = this.pan.y
                         when {
                             y > 0 -> state.dispatchShow(y)
@@ -110,16 +108,19 @@ private fun HeaderBox(
                 }
             },
             onMove = {
-                if (isDrag) {
+                if (state.isDrag) {
                     velocityAdd(it)
                 }
             },
             onUp = {
-                if (isDrag && pointerCount == 1) {
+                if (state.isDrag && pointerCount == 1) {
                     val velocity = velocityGet(it.id)?.y ?: 0f
                     state.dispatchFling(velocity)
                 }
             },
+            onFinish = {
+                state.isDrag = false
+            }
         )
     ) {
         header()
@@ -134,13 +135,13 @@ private enum class SlotId {
 private class NestedState(
     private val coroutineScope: CoroutineScope,
 ) {
-    var headerSize: Float = 0f
+    var isDrag: Boolean = false
 
+    var headerSize: Float = 0f
     val maxOffset: Float = 0f
     val minOffset: Float get() = -headerSize
 
     var offset by mutableFloatStateOf(0f)
-
     private val _anim = Animatable(0f)
 
     val nestedScrollConnection = object : NestedScrollConnection {
