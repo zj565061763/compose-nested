@@ -54,7 +54,7 @@ fun FNestedHeader(
         val headerSize = headerPlaceable.height + offset
         val leftHeight = (cs.maxHeight - headerSize).coerceAtLeast(0)
 
-        val contentPlaceable = subcompose(SlotId.Content, content).let {
+        val contentPlaceable = (subcompose(SlotId.Content) { content() }).let {
             check(it.size == 1)
             it.first().measure(cs.copy(maxHeight = leftHeight))
         }
