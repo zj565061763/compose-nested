@@ -30,45 +30,23 @@ internal class NestedHeaderState(
     private val _anim = Animatable(0f)
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
-    val headerNestedScrollConnection = object : NestedScrollConnection {
-        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            val y = available.y
-            return if (dispatchHide(y, source)) {
-                available.copy(y = y)
-            } else {
-                super.onPreScroll(available, source)
-            }
+    val headerNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
+        onPreScroll = { value, source ->
+            dispatchHide(value, source)
+        },
+        onPostScroll = { value, source ->
+            dispatchShow(value, source)
         }
+    )
 
-        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-            val y = available.y
-            return if (dispatchShow(y, source)) {
-                available.copy(y = y)
-            } else {
-                super.onPostScroll(consumed, available, source)
-            }
+    val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
+        onPreScroll = { value, source ->
+            dispatchHide(value, source)
+        },
+        onPostScroll = { value, source ->
+            dispatchShow(value, source)
         }
-    }
-
-    val contentNestedScrollConnection = object : NestedScrollConnection {
-        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-            val y = available.y
-            return if (dispatchHide(y, source)) {
-                available.copy(y = y)
-            } else {
-                super.onPreScroll(available, source)
-            }
-        }
-
-        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-            val y = available.y
-            return if (dispatchShow(y, source)) {
-                available.copy(y = y)
-            } else {
-                super.onPostScroll(consumed, available, source)
-            }
-        }
-    }
+    )
 
     fun setSize(header: Int, content: Int, container: Int) {
         isReady = header > 0
@@ -136,6 +114,29 @@ internal class NestedHeaderState(
             coroutineScope.launch {
                 _anim.stop()
             }
+        }
+    }
+}
+
+private class NestedScrollConnectionY(
+    val onPreScroll: (Float, NestedScrollSource) -> Boolean,
+    val onPostScroll: (Float, NestedScrollSource) -> Boolean,
+) : NestedScrollConnection {
+    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+        val y = available.y
+        return if (onPreScroll(y, source)) {
+            available.copy(y = y)
+        } else {
+            super.onPreScroll(available, source)
+        }
+    }
+
+    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+        val y = available.y
+        return if (onPostScroll(y, source)) {
+            available.copy(y = y)
+        } else {
+            super.onPostScroll(consumed, available, source)
         }
     }
 }
