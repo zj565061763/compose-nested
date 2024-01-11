@@ -100,30 +100,15 @@ private fun HeaderBox(
                         }
                     }
 
-                    val y = this.pan.y
-                    if (y == 0f) {
-                        return@fPointer
-                    }
-
-                    val centroid = this.centroid
-                    if (centroid.y < 0 || centroid.y > this.size.height) {
-                        return@fPointer
-                    }
-
-                    isDrag = true
-
-                    when {
-                        y > 0 -> {
-                            if (state.dispatchShow(y)) {
-                                currentEvent.fConsume { it.positionChanged() }
-                            }
+                    val centroidY = this.centroid.y
+                    if (centroidY >= 0 && centroidY < this.size.height) {
+                        isDrag = true
+                        val y = this.pan.y
+                        when {
+                            y > 0 -> state.dispatchShow(y)
+                            y < 0 -> state.dispatchHide(y)
                         }
-
-                        y < 0 -> {
-                            if (state.dispatchHide(y)) {
-                                currentEvent.fConsume { it.positionChanged() }
-                            }
-                        }
+                        currentEvent.fConsume { it.positionChanged() }
                     }
                 }
             },
