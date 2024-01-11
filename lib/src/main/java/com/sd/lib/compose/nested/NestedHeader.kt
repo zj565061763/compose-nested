@@ -37,10 +37,7 @@ fun FNestedHeader(
     }
 
     SubcomposeLayout(
-        modifier = modifier.nestedScroll(
-            connection = state.nestedScrollConnection,
-            dispatcher = state.nestedScrollDispatcher,
-        )
+        modifier = modifier.nestedScroll(state.nestedScrollConnection),
     ) { cs ->
         val hasFixedWidth = cs.hasFixedWidth
         val hasFixedHeight = cs.hasFixedHeight
@@ -54,7 +51,7 @@ fun FNestedHeader(
             state.headerSize = it.height.toFloat()
         }
 
-        val contentPlaceable = (subcompose(SlotId.Content) { content() }).let {
+        val contentPlaceable = (subcompose(SlotId.Content) { ContentBox(state, content) }).let {
             check(it.size == 1)
             it.first().measure(cs)
         }
@@ -128,6 +125,16 @@ private fun HeaderBox(
         )
     ) {
         header()
+    }
+}
+
+@Composable
+private fun ContentBox(
+    state: NestedState,
+    content: @Composable () -> Unit,
+) {
+    Box {
+        content()
     }
 }
 
