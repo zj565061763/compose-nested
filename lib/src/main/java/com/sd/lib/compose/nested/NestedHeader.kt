@@ -49,7 +49,7 @@ fun FNestedHeader(
             check(it.size == 1)
             it.first().measure(cs.copy(maxHeight = Constraints.Infinity))
         }.also {
-            state.headerSize = it.height
+            state.headerSize = it.height.toFloat()
         }
 
         val headerDisplaySize = headerPlaceable.height + offset
@@ -138,14 +138,14 @@ private enum class SlotId {
 private class NestedState(
     private val coroutineScope: CoroutineScope,
 ) {
-    var headerSize: Int = 0
+    var headerSize: Float = 0f
 
     val maxOffset: Float = 0f
-    val minOffset: Float get() = -headerSize.toFloat()
+    val minOffset: Float get() = -headerSize
 
     var offset by mutableFloatStateOf(0f)
 
-    private val _anim = Animatable(offset)
+    private val _anim = Animatable(0f)
 
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
