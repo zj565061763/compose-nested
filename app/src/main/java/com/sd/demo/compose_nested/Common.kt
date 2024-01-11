@@ -47,7 +47,7 @@ val nestedScrollConnection = object : NestedScrollConnection {
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-        logMsg { "f2 (${available.y})" }
+        logMsg { "f2 (${available.y}) (${consumed.y})" }
         return super.onPostFling(consumed, available)
     }
 }
