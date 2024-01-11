@@ -82,49 +82,61 @@ private fun HeaderBox(
     header: @Composable () -> Unit,
 ) {
     var isDrag by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
-        modifier = Modifier.fPointer(
-            onStart = {
-                isDrag = false
-                calculatePan = true
-            },
-            onCalculate = {
-                if (currentEvent.changes.any { it.positionChanged() }) {
-                    if (!isDrag) {
-                        if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                            cancelPointer()
-                            return@fPointer
+        modifier = Modifier
+            .nestedScroll(
+                connection = object : NestedScrollConnection {},
+                dispatcher = state.nestedScrollDispatcher,
+            )
+            .fPointer(
+                onStart = {
+                    isDrag = false
+                    calculatePan = true
+                },
+                onCalculate = {
+                    if (currentEvent.changes.any { it.positionChanged() }) {
+                        if (!isDrag) {
+                            if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                                cancelPointer()
+                                return@fPointer
+                            }
                         }
-                    }
 
-                    val centroidY = this.centroid.y
-                    if (centroidY >= 0 && centroidY < this.size.height) {
                         isDrag = true
-                        val y = this.pan.y
-                        when {
-                            y > 0 -> state.dispatchShow(y)
-                            y < 0 -> state.dispatchHide(y)
-                        }
                         currentEvent.fConsume { it.positionChanged() }
+
+                        val y = this.pan.y
+                        val available = Offset(0f, y)
+
+                        val consumed = state.nestedScrollDispatcher.dispatchPreScroll(
+                            available = available,
+                            source = NestedScrollSource.Drag,
+                        )
+
+                        state.nestedScrollDispatcher.dispatchPostScroll(
+                            consumed = consumed,
+                            available = available - consumed,
+                            source = NestedScrollSource.Drag,
+                        )
                     }
+                },
+                onMove = {
+                    if (isDrag) {
+                        velocityAdd(it)
+                    }
+                },
+                onUp = {
+                    if (isDrag && pointerCount == 1) {
+                        val velocity = velocityGet(it.id)?.y ?: 0f
+                        state.dispatchFling(velocity)
+                    }
+                },
+                onFinish = {
+                    isDrag = false
                 }
-            },
-            onMove = {
-                if (isDrag) {
-                    velocityAdd(it)
-                }
-            },
-            onUp = {
-                if (isDrag && pointerCount == 1) {
-                    val velocity = velocityGet(it.id)?.y ?: 0f
-                    state.dispatchFling(velocity)
-                }
-            },
-            onFinish = {
-                isDrag = false
-            }
-        )
+            )
     ) {
         header()
     }
@@ -148,7 +160,6 @@ private enum class SlotId {
 private class NestedState(
     private val coroutineScope: CoroutineScope,
 ) {
-    var isDrag: Boolean = false
     var offset by mutableFloatStateOf(0f)
 
     var headerSize: Float = 0f
@@ -165,7 +176,7 @@ private class NestedState(
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             val y = available.y
-            return if (!isDrag && dispatchHide(y)) {
+            return if (dispatchHide(y)) {
                 available.copy(y = y)
             } else {
                 super.onPreScroll(available, source)
@@ -174,7 +185,7 @@ private class NestedState(
 
         override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
             val y = available.y
-            return if (!isDrag && dispatchShow(y)) {
+            return if (dispatchShow(y)) {
                 available.copy(y = y)
             } else {
                 super.onPostScroll(consumed, available, source)
