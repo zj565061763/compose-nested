@@ -245,7 +245,7 @@ private class NestedState(
                 }
             }
 
-            headerNestedScrollDispatcher.dispatchPostFling(consumed, left)
+            headerNestedScrollDispatcher.dispatchPostFling(left, left)
         }
     }
 
@@ -269,7 +269,7 @@ private fun NestedScrollDispatcher.dispatchScrollY(y: Float, source: NestedScrol
     ).consumedCoerceIn(available)
 
     dispatchPostScroll(
-        consumed = consumed,
+        consumed = Offset.Zero,
         available = available - consumed,
         source = source,
     )
