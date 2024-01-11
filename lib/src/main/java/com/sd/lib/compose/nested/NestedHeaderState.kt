@@ -20,9 +20,13 @@ internal class NestedHeaderState(
     var isReady by mutableStateOf(false)
         private set
 
-    var isHeaderDrag: Boolean = false
-
     var offset by mutableFloatStateOf(0f)
+
+    var isHeaderTouch: Boolean = false
+        set(value) {
+            field = value
+            if (value) cancelAnim()
+        }
 
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f

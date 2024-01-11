@@ -6,7 +6,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -111,45 +113,52 @@ private fun ContentBox(
 private fun Modifier.headerGesture(
     state: NestedHeaderState,
 ): Modifier {
-    return if (state.isReady) {
-        this.fPointer(
-            onStart = {
-                state.isHeaderDrag = false
-                calculatePan = true
-            },
-            onCalculate = {
-                if (currentEvent.changes.any { it.positionChanged() }) {
-                    if (!state.isHeaderDrag) {
-                        if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                            cancelPointer()
-                            return@fPointer
+    return composed {
+
+        var isDrag by remember { mutableStateOf(false) }
+
+        if (state.isReady) {
+            this.fPointer(
+                onStart = {
+                    state.isHeaderTouch = true
+                    isDrag = false
+                    calculatePan = true
+                },
+                onCalculate = {
+                    if (currentEvent.changes.any { it.positionChanged() }) {
+                        if (!isDrag) {
+                            if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                                cancelPointer()
+                                return@fPointer
+                            }
                         }
+
+                        val y = this.pan.y
+                        if (y == 0f) return@fPointer
+
+                        isDrag = true
+                        currentEvent.fConsume { it.positionChanged() }
+                        state.headerNestedScrollDispatcher.dispatchScrollY(y, NestedScrollSource.Drag)
                     }
-
-                    val y = this.pan.y
-                    if (y == 0f) return@fPointer
-
-                    state.isHeaderDrag = true
-                    currentEvent.fConsume { it.positionChanged() }
-                    state.headerNestedScrollDispatcher.dispatchScrollY(y, NestedScrollSource.Drag)
+                },
+                onMove = {
+                    if (isDrag) {
+                        velocityAdd(it)
+                    }
+                },
+                onUp = {
+                    if (isDrag && pointerCount == 1) {
+                        val velocity = velocityGet(it.id)?.y ?: 0f
+                        state.dispatchFling(velocity)
+                    }
+                },
+                onFinish = {
+                    isDrag = false
+                    state.isHeaderTouch = false
                 }
-            },
-            onMove = {
-                if (state.isHeaderDrag) {
-                    velocityAdd(it)
-                }
-            },
-            onUp = {
-                if (state.isHeaderDrag && pointerCount == 1) {
-                    val velocity = velocityGet(it.id)?.y ?: 0f
-                    state.dispatchFling(velocity)
-                }
-            },
-            onFinish = {
-                state.isHeaderDrag = false
-            }
-        )
-    } else {
-        this
+            )
+        } else {
+            this
+        }
     }
 }
