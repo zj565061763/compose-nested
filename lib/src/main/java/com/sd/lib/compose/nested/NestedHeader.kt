@@ -43,8 +43,6 @@ fun FNestedHeader(
         @Suppress("NAME_SHADOWING")
         val cs = cs.copy(minWidth = 0, minHeight = 0)
 
-        val offset = state.offset.toInt()
-
         val headerPlaceable = (subcompose(SlotId.Header) { HeaderBox(state, header) }).let {
             check(it.size == 1)
             it.first().measure(cs.copy(maxHeight = Constraints.Infinity))
@@ -52,12 +50,9 @@ fun FNestedHeader(
             state.headerSize = it.height.toFloat()
         }
 
-        val headerDisplaySize = headerPlaceable.height + offset
-        val leftHeight = (cs.maxHeight - headerDisplaySize).coerceAtLeast(0)
-
         val contentPlaceable = (subcompose(SlotId.Content) { content() }).let {
             check(it.size == 1)
-            it.first().measure(cs.copy(maxHeight = leftHeight))
+            it.first().measure(cs)
         }
 
         val width = if (hasFixedWidth) {
@@ -73,6 +68,7 @@ fun FNestedHeader(
         }
 
         layout(width, height) {
+            val offset = state.offset.toInt()
             headerPlaceable.placeRelative(0, offset)
             contentPlaceable.placeRelative(0, headerPlaceable.height + offset)
         }
