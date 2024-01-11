@@ -17,6 +17,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.unit.Constraints
 import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fPointer
 import kotlinx.coroutines.CoroutineScope
@@ -46,13 +47,13 @@ fun FNestedHeader(
 
         val headerPlaceable = (subcompose(SlotId.Header) { HeaderBox(state, header) }).let {
             check(it.size == 1)
-            it.first().measure(cs)
+            it.first().measure(cs.copy(maxHeight = Constraints.Infinity))
         }.also {
             state.headerSize = it.height
         }
 
-        val headerSize = headerPlaceable.height + offset
-        val leftHeight = (cs.maxHeight - headerSize).coerceAtLeast(0)
+        val headerDisplaySize = headerPlaceable.height + offset
+        val leftHeight = (cs.maxHeight - headerDisplaySize).coerceAtLeast(0)
 
         val contentPlaceable = (subcompose(SlotId.Content) { content() }).let {
             check(it.size == 1)
