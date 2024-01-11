@@ -62,18 +62,18 @@ private fun HeaderView(
                 }
         )
 
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(500.dp)
-//                .background(Color.Green)
-//        )
-//
-//        Box(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .height(500.dp)
-//                .background(Color.Blue)
-//        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(500.dp)
+                .background(Color.Green)
+        )
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(500.dp)
+                .background(Color.Blue)
+        )
     }
 }
