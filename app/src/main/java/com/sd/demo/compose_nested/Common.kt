@@ -15,11 +15,12 @@ import androidx.compose.ui.unit.Velocity
 @Composable
 fun ListView(
     modifier: Modifier = Modifier,
+    count: Int,
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
     ) {
-        items(50) { index ->
+        items(count) { index ->
             Button(
                 onClick = { },
                 modifier = Modifier.fillMaxWidth(),

@@ -41,7 +41,7 @@ private fun Content(
             HeaderView()
         }
     ) {
-        ListView()
+        ListView(count = 50)
     }
 }
 
