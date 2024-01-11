@@ -23,6 +23,7 @@
         </activity>
 
         <activity android:name=".SampleNestedHeader" />
+        <activity android:name=".TestNestedScrollConnection" />
 
     </application>
 

@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
                 Content(
                     listActivity = listOf(
                         SampleNestedHeader::class.java,
+                        TestNestedScrollConnection::class.java,
                     ),
                     onClickActivity = {
                         startActivity(Intent(this, it))
