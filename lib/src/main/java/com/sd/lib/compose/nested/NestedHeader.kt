@@ -245,7 +245,7 @@ private class NestedState(
                 }
             }
 
-            headerNestedScrollDispatcher.dispatchPostFling(left, left)
+            headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
         }
     }
 
