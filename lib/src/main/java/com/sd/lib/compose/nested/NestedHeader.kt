@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.positionChanged
@@ -36,7 +37,10 @@ fun FNestedHeader(
     }
 
     SubcomposeLayout(
-        modifier = modifier.nestedScroll(state.nestedScrollConnection)
+        modifier = modifier.nestedScroll(
+            connection = state.nestedScrollConnection,
+            dispatcher = state.nestedScrollDispatcher,
+        )
     ) { cs ->
         val hasFixedWidth = cs.hasFixedWidth
         val hasFixedHeight = cs.hasFixedHeight
@@ -168,6 +172,8 @@ private class NestedState(
             }
         }
     }
+
+    val nestedScrollDispatcher = NestedScrollDispatcher()
 
     fun dispatchHide(value: Float): Boolean {
         if (headerSize <= 0) return false
