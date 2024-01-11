@@ -32,22 +32,22 @@ fun ListView(
 
 val nestedScrollConnection = object : NestedScrollConnection {
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        logMsg { "s1 ${available.y} $source" }
+        logMsg { "s1 (${available.y}) $source" }
         return super.onPreScroll(available, source)
     }
 
     override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-        logMsg { "s2 ${available.y} $source" }
+        logMsg { "s2 (${available.y}) (${consumed.y}) $source" }
         return super.onPostScroll(consumed, available, source)
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
-        logMsg { "f1 ${available.y}" }
+        logMsg { "f1 (${available.y})" }
         return super.onPreFling(available)
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-        logMsg { "f2 ${available.y}" }
+        logMsg { "f2 (${available.y})" }
         return super.onPostFling(consumed, available)
     }
 }
