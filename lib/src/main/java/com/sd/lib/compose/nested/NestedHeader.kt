@@ -147,7 +147,7 @@ private class NestedState(
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             val y = available.y
-            return if (dispatchHide(y)) {
+            return if (!isDrag && dispatchHide(y)) {
                 available.copy(y = y)
             } else {
                 super.onPreScroll(available, source)
@@ -156,7 +156,7 @@ private class NestedState(
 
         override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
             val y = available.y
-            return if (dispatchShow(y)) {
+            return if (!isDrag && dispatchShow(y)) {
                 available.copy(y = y)
             } else {
                 super.onPostScroll(consumed, available, source)
