@@ -93,6 +93,13 @@ private fun HeaderBox(
             },
             onCalculate = {
                 if (currentEvent.changes.any { it.positionChanged() }) {
+                    if (!isDrag) {
+                        if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                            cancelPointer()
+                            return@fPointer
+                        }
+                    }
+
                     val y = this.pan.y
                     if (y == 0f) {
                         return@fPointer
@@ -101,13 +108,6 @@ private fun HeaderBox(
                     val centroid = this.centroid
                     if (centroid.y < 0 || centroid.y > this.size.height) {
                         return@fPointer
-                    }
-
-                    if (!isDrag) {
-                        if (this.pan.x.absoluteValue >= y.absoluteValue) {
-                            cancelPointer()
-                            return@fPointer
-                        }
                     }
 
                     isDrag = true
