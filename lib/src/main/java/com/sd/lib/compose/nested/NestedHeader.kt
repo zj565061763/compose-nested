@@ -37,9 +37,7 @@ fun FNestedHeader(
         mutableStateOf(NestedState(coroutineScope))
     }
 
-    SubcomposeLayout(
-        modifier = modifier.nestedScroll(state.nestedScrollConnection),
-    ) { cs ->
+    SubcomposeLayout(modifier = modifier) { cs ->
         val hasFixedWidth = cs.hasFixedWidth
         val hasFixedHeight = cs.hasFixedHeight
         @Suppress("NAME_SHADOWING")
@@ -81,65 +79,29 @@ fun FNestedHeader(
     }
 }
 
+private enum class SlotId {
+    Header,
+    Content,
+}
+
 @Composable
 private fun HeaderBox(
     state: NestedState,
     header: @Composable () -> Unit,
 ) {
-    var isDrag by remember { mutableStateOf(false) }
-
     Box(
-        modifier = Modifier
-            .nestedScroll(
-                connection = object : NestedScrollConnection {},
-                dispatcher = state.headerNestedScrollDispatcher,
-            )
-            .let { m ->
-                if (state.isReady) {
-                    m.fPointer(
-                        onStart = {
-                            isDrag = false
-                            calculatePan = true
-                        },
-                        onCalculate = {
-                            if (currentEvent.changes.any { it.positionChanged() }) {
-                                if (!isDrag) {
-                                    if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                                        cancelPointer()
-                                        return@fPointer
-                                    }
-                                }
-
-                                val y = this.pan.y
-                                if (y == 0f) return@fPointer
-
-                                isDrag = true
-                                currentEvent.fConsume { it.positionChanged() }
-                                state.headerNestedScrollDispatcher.dispatchScrollY(y, NestedScrollSource.Drag)
-                            }
-                        },
-                        onMove = {
-                            if (isDrag) {
-                                velocityAdd(it)
-                            }
-                        },
-                        onUp = {
-                            if (isDrag && pointerCount == 1) {
-                                val velocity = velocityGet(it.id)?.y ?: 0f
-                                state.dispatchFling(velocity)
-                            }
-                        },
-                        onFinish = {
-                            isDrag = false
-                        }
-                    )
-                } else {
-                    m
-                }
-            },
-
+        modifier = Modifier.nestedScroll(state.headerNestedScrollConnection)
+    ) {
+        Box(
+            modifier = Modifier
+                .nestedScroll(
+                    connection = object : NestedScrollConnection {},
+                    dispatcher = state.headerNestedScrollDispatcher,
+                )
+                .headerGesture(state),
         ) {
-        header()
+            header()
+        }
     }
 }
 
@@ -148,36 +110,77 @@ private fun ContentBox(
     state: NestedState,
     content: @Composable () -> Unit,
 ) {
-    Box {
+    Box(
+        modifier = Modifier.nestedScroll(state.contentNestedScrollConnection)
+    ) {
         content()
     }
 }
 
-private enum class SlotId {
-    Header,
-    Content,
+private fun Modifier.headerGesture(
+    state: NestedState,
+): Modifier {
+    return if (state.isReady) {
+        this.fPointer(
+            onStart = {
+                state.isHeaderDrag = false
+                calculatePan = true
+            },
+            onCalculate = {
+                if (currentEvent.changes.any { it.positionChanged() }) {
+                    if (!state.isHeaderDrag) {
+                        if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                            cancelPointer()
+                            return@fPointer
+                        }
+                    }
+
+                    val y = this.pan.y
+                    if (y == 0f) return@fPointer
+
+                    state.isHeaderDrag = true
+                    currentEvent.fConsume { it.positionChanged() }
+                    state.headerNestedScrollDispatcher.dispatchScrollY(y, NestedScrollSource.Drag)
+                }
+            },
+            onMove = {
+                if (state.isHeaderDrag) {
+                    velocityAdd(it)
+                }
+            },
+            onUp = {
+                if (state.isHeaderDrag && pointerCount == 1) {
+                    val velocity = velocityGet(it.id)?.y ?: 0f
+                    state.dispatchFling(velocity)
+                }
+            },
+            onFinish = {
+                state.isHeaderDrag = false
+            }
+        )
+    } else {
+        this
+    }
 }
+
 
 private class NestedState(
     private val coroutineScope: CoroutineScope,
 ) {
-    var offset by mutableFloatStateOf(0f)
-
     var isReady by mutableStateOf(false)
         private set
 
-    private var _headerSize: Float = 0f
-        set(value) {
-            field = value
-            isReady = value > 0f
-        }
+    var isHeaderDrag: Boolean = false
+
+    var offset by mutableFloatStateOf(0f)
 
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
 
     private val _anim = Animatable(0f)
 
-    val nestedScrollConnection = object : NestedScrollConnection {
+    val headerNestedScrollDispatcher = NestedScrollDispatcher()
+    val headerNestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             val y = available.y
             return if (dispatchHide(y, source)) {
@@ -197,16 +200,34 @@ private class NestedState(
         }
     }
 
-    val headerNestedScrollDispatcher = NestedScrollDispatcher()
+    val contentNestedScrollConnection = object : NestedScrollConnection {
+        override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+            val y = available.y
+            return if (dispatchHide(y, source)) {
+                available.copy(y = y)
+            } else {
+                super.onPreScroll(available, source)
+            }
+        }
+
+        override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+            val y = available.y
+            return if (dispatchShow(y, source)) {
+                available.copy(y = y)
+            } else {
+                super.onPostScroll(consumed, available, source)
+            }
+        }
+    }
 
     fun setSize(header: Int, content: Int, container: Int) {
-        _headerSize = header.toFloat()
+        isReady = header > 0
         _minOffset = if (content < container) {
             val bottom = header + content
             val delta = container - bottom
             delta.toFloat().coerceAtMost(0f)
         } else {
-            -_headerSize
+            -header.toFloat()
         }
     }
 
