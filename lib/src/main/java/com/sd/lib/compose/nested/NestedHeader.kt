@@ -48,8 +48,6 @@ fun FNestedHeader(
         val headerPlaceable = (subcompose(SlotId.Header) { HeaderBox(state, header) }).let {
             check(it.size == 1)
             it.first().measure(cs.copy(maxHeight = Constraints.Infinity))
-        }.also {
-            state.setHeaderSize(it.height)
         }
 
         val contentPlaceable = (subcompose(SlotId.Content) { ContentBox(state, content) }).let {
@@ -68,6 +66,12 @@ fun FNestedHeader(
         } else {
             maxOf(headerPlaceable.height, contentPlaceable.height).coerceAtMost(cs.maxHeight)
         }
+
+        state.setSize(
+            header = headerPlaceable.height,
+            content = contentPlaceable.height,
+            container = height,
+        )
 
         layout(width, height) {
             val offset = state.offset.toInt()
@@ -166,10 +170,9 @@ private class NestedState(
         set(value) {
             field = value
             isReady = value > 0f
-            _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
         }
 
-    private val _minOffset: Float get() = -_headerSize
+    private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
 
     private val _anim = Animatable(0f)
@@ -196,8 +199,13 @@ private class NestedState(
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
 
-    fun setHeaderSize(size: Int) {
-        _headerSize = size.toFloat()
+    fun setSize(header: Int, content: Int, container: Int) {
+        _headerSize = header.toFloat()
+        _minOffset = if (content < container) {
+            0f
+        } else {
+            -_headerSize
+        }
     }
 
     fun dispatchHide(value: Float, source: NestedScrollSource): Boolean {
@@ -234,6 +242,7 @@ private class NestedState(
             val left = available - consumed
             if (left != Velocity.Zero) {
                 var lastValue = offset
+                _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
                 _anim.snapTo(offset)
                 _anim.animateDecay(
                     initialVelocity = left.y,
