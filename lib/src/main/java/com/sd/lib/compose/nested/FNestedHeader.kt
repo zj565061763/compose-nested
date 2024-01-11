@@ -1,6 +1,5 @@
 package com.sd.lib.compose.nested
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.exponentialDecay
 import androidx.compose.foundation.layout.Box
@@ -19,6 +18,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.SubcomposeLayout
 import com.sd.lib.compose.gesture.fPointer
 import kotlinx.coroutines.CoroutineScope
@@ -87,12 +88,14 @@ private fun HeaderBox(
 ) {
     var isDrag by remember { mutableStateOf(false) }
 
+    val velocityTracker by remember { mutableStateOf(VelocityTracker()) }
+
     Box(
         modifier = Modifier.fPointer(
             onStart = {
                 isDrag = false
                 calculatePan = true
-                enableVelocity = true
+                velocityTracker.resetTracking()
             },
             onCalculate = {
                 if (currentEvent.changes.any { it.positionChanged() }) {
@@ -130,9 +133,14 @@ private fun HeaderBox(
                     }
                 }
             },
+            onMove = {
+                if (isDrag) {
+                    velocityTracker.addPointerInputChange(it)
+                }
+            },
             onUp = {
                 if (isDrag && pointerCount == 1) {
-                    val velocity = checkNotNull(this.getPointerVelocity(it.id)).y
+                    val velocity = velocityTracker.calculateVelocity().y
                     state.dispatchFling(velocity)
                 }
             },
@@ -208,14 +216,13 @@ private class NestedState(
     fun dispatchFling(velocity: Float) {
         if (velocity == 0f) return
         coroutineScope.launch {
-            Log.i("FNestedHeader", "offset:$offset velocity:$velocity")
             _anim.apply {
                 snapTo(offset)
                 updateBounds(lowerBound = minOffset, upperBound = maxOffset)
             }
             _anim.animateDecay(
                 initialVelocity = velocity,
-                animationSpec = exponentialDecay(),
+                animationSpec = exponentialDecay(frictionMultiplier = 2.2f),
             ) {
                 offset = value
             }
