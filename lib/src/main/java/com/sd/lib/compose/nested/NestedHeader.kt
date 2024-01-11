@@ -202,7 +202,7 @@ private class NestedState(
             }
             _anim.animateDecay(
                 initialVelocity = velocity,
-                animationSpec = exponentialDecay(frictionMultiplier = 2.2f),
+                animationSpec = exponentialDecay(frictionMultiplier = 2f),
             ) {
                 offset = value
             }
