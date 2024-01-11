@@ -19,6 +19,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Velocity
 import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fPointer
 import kotlinx.coroutines.CoroutineScope
@@ -48,7 +49,7 @@ fun FNestedHeader(
             check(it.size == 1)
             it.first().measure(cs.copy(maxHeight = Constraints.Infinity))
         }.also {
-            state.headerSize = it.height.toFloat()
+            state.setHeaderSize(it.height)
         }
 
         val contentPlaceable = (subcompose(SlotId.Content) { ContentBox(state, content) }).let {
@@ -82,62 +83,58 @@ private fun HeaderBox(
     header: @Composable () -> Unit,
 ) {
     var isDrag by remember { mutableStateOf(false) }
-    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
             .nestedScroll(
                 connection = object : NestedScrollConnection {},
-                dispatcher = state.nestedScrollDispatcher,
+                dispatcher = state.headerNestedScrollDispatcher,
             )
-            .fPointer(
-                onStart = {
-                    isDrag = false
-                    calculatePan = true
-                },
-                onCalculate = {
-                    if (currentEvent.changes.any { it.positionChanged() }) {
-                        if (!isDrag) {
-                            if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                                cancelPointer()
-                                return@fPointer
+            .let { m ->
+                if (state.isReady) {
+                    m.fPointer(
+                        onStart = {
+                            isDrag = false
+                            calculatePan = true
+                        },
+                        onCalculate = {
+                            if (currentEvent.changes.any { it.positionChanged() }) {
+                                if (!isDrag) {
+                                    if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                                        cancelPointer()
+                                        return@fPointer
+                                    }
+                                }
+
+                                val y = this.pan.y
+                                if (y == 0f) return@fPointer
+
+                                isDrag = true
+                                currentEvent.fConsume { it.positionChanged() }
+                                state.headerNestedScrollDispatcher.dispatchScrollY(y, NestedScrollSource.Drag)
                             }
+                        },
+                        onMove = {
+                            if (isDrag) {
+                                velocityAdd(it)
+                            }
+                        },
+                        onUp = {
+                            if (isDrag && pointerCount == 1) {
+                                val velocity = velocityGet(it.id)?.y ?: 0f
+                                state.dispatchFling(velocity)
+                            }
+                        },
+                        onFinish = {
+                            isDrag = false
                         }
-
-                        isDrag = true
-                        currentEvent.fConsume { it.positionChanged() }
-
-                        val y = this.pan.y
-                        val available = Offset(0f, y)
-
-                        val consumed = state.nestedScrollDispatcher.dispatchPreScroll(
-                            available = available,
-                            source = NestedScrollSource.Drag,
-                        )
-
-                        state.nestedScrollDispatcher.dispatchPostScroll(
-                            consumed = consumed,
-                            available = available - consumed,
-                            source = NestedScrollSource.Drag,
-                        )
-                    }
-                },
-                onMove = {
-                    if (isDrag) {
-                        velocityAdd(it)
-                    }
-                },
-                onUp = {
-                    if (isDrag && pointerCount == 1) {
-                        val velocity = velocityGet(it.id)?.y ?: 0f
-                        state.dispatchFling(velocity)
-                    }
-                },
-                onFinish = {
-                    isDrag = false
+                    )
+                } else {
+                    m
                 }
-            )
-    ) {
+            },
+
+        ) {
         header()
     }
 }
@@ -162,13 +159,17 @@ private class NestedState(
 ) {
     var offset by mutableFloatStateOf(0f)
 
-    var headerSize: Float = 0f
+    var isReady by mutableStateOf(false)
+        private set
+
+    private var _headerSize: Float = 0f
         set(value) {
             field = value
+            isReady = value > 0f
             _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
         }
 
-    private val _minOffset: Float get() = -headerSize
+    private val _minOffset: Float get() = -_headerSize
     private val _maxOffset: Float = 0f
 
     private val _anim = Animatable(0f)
@@ -176,7 +177,7 @@ private class NestedState(
     val nestedScrollConnection = object : NestedScrollConnection {
         override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
             val y = available.y
-            return if (dispatchHide(y)) {
+            return if (dispatchHide(y, source)) {
                 available.copy(y = y)
             } else {
                 super.onPreScroll(available, source)
@@ -185,7 +186,7 @@ private class NestedState(
 
         override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
             val y = available.y
-            return if (dispatchShow(y)) {
+            return if (dispatchShow(y, source)) {
                 available.copy(y = y)
             } else {
                 super.onPostScroll(consumed, available, source)
@@ -193,11 +194,15 @@ private class NestedState(
         }
     }
 
-    val nestedScrollDispatcher = NestedScrollDispatcher()
+    val headerNestedScrollDispatcher = NestedScrollDispatcher()
 
-    fun dispatchHide(value: Float): Boolean {
-        if (headerSize <= 0) return false
-        cancelAnim()
+    fun setHeaderSize(size: Int) {
+        _headerSize = size.toFloat()
+    }
+
+    fun dispatchHide(value: Float, source: NestedScrollSource): Boolean {
+        if (!isReady) return false
+        if (source == NestedScrollSource.Drag) cancelAnim()
         if (value < 0) {
             if (offset > _minOffset) {
                 val newOffset = offset + value
@@ -208,9 +213,9 @@ private class NestedState(
         return false
     }
 
-    fun dispatchShow(value: Float): Boolean {
-        if (headerSize <= 0) return false
-        cancelAnim()
+    fun dispatchShow(value: Float, source: NestedScrollSource): Boolean {
+        if (!isReady) return false
+        if (source == NestedScrollSource.Drag) cancelAnim()
         if (value > 0) {
             if (offset < _maxOffset) {
                 val newOffset = offset + value
@@ -224,13 +229,25 @@ private class NestedState(
     fun dispatchFling(velocity: Float) {
         if (velocity == 0f) return
         coroutineScope.launch {
+            val available = Velocity(0f, velocity)
+            val consumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
+
+            val left = velocity - consumed.y
+            if (left == 0f) return@launch
+
+            var lastValue = offset
+
             _anim.snapTo(offset)
             _anim.animateDecay(
                 initialVelocity = velocity,
                 animationSpec = exponentialDecay(frictionMultiplier = 2f),
             ) {
-                offset = value
+                val delta = value - lastValue
+                lastValue = value
+                headerNestedScrollDispatcher.dispatchScrollY(delta, NestedScrollSource.Fling)
             }
+
+            headerNestedScrollDispatcher.dispatchPostFling(consumed, available - consumed)
         }
     }
 
@@ -240,5 +257,50 @@ private class NestedState(
                 _anim.stop()
             }
         }
+    }
+}
+
+private fun NestedScrollDispatcher.dispatchScrollY(y: Float, source: NestedScrollSource) {
+    if (y == 0f) return
+
+    val available = Offset(0f, y)
+
+    val consumed = dispatchPreScroll(
+        available = available,
+        source = source,
+    ).consumedCoerceIn(available)
+
+    dispatchPostScroll(
+        consumed = consumed,
+        available = available - consumed,
+        source = source,
+    )
+}
+
+private fun Offset.consumedCoerceIn(available: Offset): Offset {
+    val legalX = this.x.consumedCoerceIn(available.x)
+    val legalY = this.y.consumedCoerceIn(available.y)
+    return if (this.x == legalX && this.y == legalY) {
+        this
+    } else {
+        this.copy(x = legalX, y = legalY)
+    }
+}
+
+private fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
+    val legalX = this.x.consumedCoerceIn(available.x)
+    val legalY = this.y.consumedCoerceIn(available.y)
+    return if (this.x == legalX && this.y == legalY) {
+        this
+    } else {
+        this.copy(x = legalX, y = legalY)
+    }
+}
+
+private fun Float.consumedCoerceIn(available: Float): Float {
+    return when {
+        available > 0f -> this.coerceIn(0f, available)
+        available < 0f -> this.coerceIn(available, 0f)
+        else -> 0f
     }
 }
