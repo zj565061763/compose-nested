@@ -136,17 +136,17 @@ private class NestedState(
     private val coroutineScope: CoroutineScope,
 ) {
     var isDrag: Boolean = false
+    var offset by mutableFloatStateOf(0f)
 
     var headerSize: Float = 0f
         set(value) {
             field = value
-            _anim.updateBounds(lowerBound = minOffset, upperBound = maxOffset)
+            _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
         }
 
-    val minOffset: Float get() = -headerSize
-    val maxOffset: Float = 0f
+    private val _minOffset: Float get() = -headerSize
+    private val _maxOffset: Float = 0f
 
-    var offset by mutableFloatStateOf(0f)
     private val _anim = Animatable(0f)
 
     val nestedScrollConnection = object : NestedScrollConnection {
@@ -173,9 +173,9 @@ private class NestedState(
         if (headerSize <= 0) return false
         cancelAnim()
         if (value < 0) {
-            if (offset > minOffset) {
+            if (offset > _minOffset) {
                 val newOffset = offset + value
-                offset = newOffset.coerceAtLeast(minOffset)
+                offset = newOffset.coerceAtLeast(_minOffset)
                 return true
             }
         }
@@ -186,9 +186,9 @@ private class NestedState(
         if (headerSize <= 0) return false
         cancelAnim()
         if (value > 0) {
-            if (offset < maxOffset) {
+            if (offset < _maxOffset) {
                 val newOffset = offset + value
-                offset = newOffset.coerceAtMost(maxOffset)
+                offset = newOffset.coerceAtMost(_maxOffset)
                 return true
             }
         }
