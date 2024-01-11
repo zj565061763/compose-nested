@@ -202,7 +202,9 @@ private class NestedState(
     fun setSize(header: Int, content: Int, container: Int) {
         _headerSize = header.toFloat()
         _minOffset = if (content < container) {
-            0f
+            val bottom = header + content
+            val delta = container - bottom
+            delta.toFloat().coerceAtMost(0f)
         } else {
             -_headerSize
         }
