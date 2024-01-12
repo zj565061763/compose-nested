@@ -13,6 +13,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 internal class NestedHeaderState(
     private val coroutineScope: CoroutineScope,
@@ -96,10 +97,15 @@ internal class NestedHeaderState(
 
     fun dispatchFling(velocity: Float) {
         coroutineScope.launch {
+            val uuid = if (debug) UUID.randomUUID().toString() else ""
+            logMsg(debug) { "fling start velocity:${velocity} $uuid" }
+
             val available = Velocity(0f, velocity)
             val consumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
 
             val left = available - consumed
+            logMsg(debug) { "fling consumed:${consumed.y} left:${left.y} $uuid" }
+
             if (left != Velocity.Zero) {
                 _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
                 _animFling.snapTo(offset)
@@ -116,6 +122,7 @@ internal class NestedHeaderState(
             }
 
             headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
+            logMsg(debug) { "fling end $uuid" }
         }
     }
 
@@ -123,7 +130,7 @@ internal class NestedHeaderState(
         return _animFling.isRunning.also { isRunning ->
             if (isRunning) {
                 coroutineScope.launch {
-                    logMsg(debug) { "cancel fling" }
+                    logMsg(debug) { "fling cancel" }
                     _animFling.stop()
                 }
             }
