@@ -17,6 +17,8 @@ import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.constrainHeight
+import androidx.compose.ui.unit.constrainWidth
 import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fPointer
 
@@ -72,13 +74,13 @@ fun FNestedHeader(
         val width = if (hasFixedWidth) {
             cs.maxWidth
         } else {
-            maxOf(headerPlaceable.width, contentPlaceable.width).coerceAtMost(cs.maxWidth)
+            cs.constrainWidth(maxOf(headerPlaceable.width, contentPlaceable.width))
         }
 
         val height = if (hasFixedHeight) {
             cs.maxHeight
         } else {
-            (headerPlaceable.height + contentPlaceable.height).coerceAtMost(cs.maxHeight)
+            cs.constrainHeight(headerPlaceable.height + contentPlaceable.height)
         }
 
         state.setSize(
