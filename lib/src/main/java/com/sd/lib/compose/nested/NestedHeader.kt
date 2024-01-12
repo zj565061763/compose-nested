@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fPointer
+import kotlin.math.absoluteValue
 
 @Composable
 fun FNestedHeader(
@@ -159,6 +160,10 @@ private fun Modifier.headerGesture(
                 onCalculate = {
                     if (currentEvent.changes.any { it.positionChanged() }) {
                         if (!isDrag) {
+                            if (this.pan.x.absoluteValue > this.pan.y.absoluteValue) {
+                                cancelPointer()
+                                return@fPointer
+                            }
                             isDrag = true
                             logMsg(debug) { "header onCalculate" }
                         }
