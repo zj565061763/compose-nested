@@ -22,13 +22,6 @@ internal class NestedHeaderState(
 
     var offset by mutableFloatStateOf(0f)
 
-    /** 当前容器是否被触摸 */
-    var isTouch: Boolean = false
-        set(value) {
-            field = value
-            if (value) cancelAnim()
-        }
-
     /** Header是否被触摸 */
     var isTouchHeader: Boolean = false
 
@@ -123,7 +116,7 @@ internal class NestedHeaderState(
         }
     }
 
-    private fun cancelAnim() {
+    fun cancelAnim() {
         if (_anim.isRunning) {
             coroutineScope.launch {
                 _anim.stop()
