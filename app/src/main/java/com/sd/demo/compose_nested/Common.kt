@@ -14,7 +14,7 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 
 @Composable
-fun ListView(
+fun VerticalListView(
     modifier: Modifier = Modifier,
     count: Int,
 ) {

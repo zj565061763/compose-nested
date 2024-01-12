@@ -27,6 +27,6 @@ private fun Content(
     Box(
         modifier = modifier.nestedScroll(nestedScrollConnection)
     ) {
-        ListView(count = 50)
+        VerticalListView(count = 50)
     }
 }
