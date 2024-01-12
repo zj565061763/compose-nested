@@ -1,5 +1,6 @@
 package com.sd.demo.compose_nested
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -13,6 +14,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 
@@ -21,6 +23,7 @@ fun VerticalListView(
     modifier: Modifier = Modifier,
     count: Int,
 ) {
+    val context = LocalContext.current
     LazyColumn(
         modifier = modifier
             .fillMaxWidth()
@@ -28,7 +31,9 @@ fun VerticalListView(
     ) {
         items(count) { index ->
             Button(
-                onClick = { },
+                onClick = {
+                    Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(text = index.toString())
@@ -42,6 +47,7 @@ fun HorizontalListView(
     modifier: Modifier = Modifier,
     count: Int,
 ) {
+    val context = LocalContext.current
     LazyRow(
         modifier = modifier
             .fillMaxWidth()
@@ -49,7 +55,9 @@ fun HorizontalListView(
     ) {
         items(count) { index ->
             Button(
-                onClick = { },
+                onClick = {
+                    Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
+                },
                 modifier = Modifier.height(200.dp)
             ) {
                 Text(text = index.toString())
