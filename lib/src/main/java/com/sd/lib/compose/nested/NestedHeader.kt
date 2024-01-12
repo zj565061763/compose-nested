@@ -36,17 +36,7 @@ fun FNestedHeader(
         this.debug = debug
     }
 
-    SubcomposeLayout(
-        modifier = modifier.fPointer(
-            pass = PointerEventPass.Initial,
-            onDown = { input ->
-                if (pointerCount == 1 && state.cancelFling()) {
-                    input.consume()
-                }
-                cancelPointer()
-            },
-        )
-    ) { cs ->
+    SubcomposeLayout(modifier = modifier) { cs ->
         val hasFixedWidth = cs.hasFixedWidth
         val hasFixedHeight = cs.hasFixedHeight
         @Suppress("NAME_SHADOWING")
@@ -132,7 +122,17 @@ private fun ContentBox(
     content: @Composable () -> Unit,
 ) {
     Box(
-        modifier = Modifier.nestedScroll(state.contentNestedScrollConnection)
+        modifier = Modifier
+            .nestedScroll(state.contentNestedScrollConnection)
+            .fPointer(
+                pass = PointerEventPass.Initial,
+                onDown = { input ->
+                    if (pointerCount == 1 && state.cancelFling()) {
+                        input.consume()
+                    }
+                    cancelPointer()
+                },
+            )
     ) {
         content()
     }
