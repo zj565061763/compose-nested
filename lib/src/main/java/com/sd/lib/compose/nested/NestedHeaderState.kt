@@ -61,7 +61,6 @@ internal class NestedHeaderState(
         } else {
             -header.toFloat()
         }
-        cancelFling()
     }
 
     fun dispatchHide(value: Float): Boolean {
