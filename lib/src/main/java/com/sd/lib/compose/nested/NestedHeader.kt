@@ -150,6 +150,7 @@ private fun Modifier.headerGesture(
             this.fPointer(
                 touchSlop = 0f,
                 onStart = {
+                    logMsg(debug) { "header start" }
                     isDrag = false
                     calculatePan = true
                 },
@@ -207,6 +208,7 @@ private fun Modifier.headerGesture(
                     }
                 },
                 onFinish = {
+                    logMsg(debug) { "header finish" }
                     isDrag = false
                 }
             )
