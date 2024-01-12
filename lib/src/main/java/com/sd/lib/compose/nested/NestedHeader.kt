@@ -205,9 +205,11 @@ private fun Modifier.headerGesture(
                     }
                 },
                 onUp = {
-                    if (isDrag && pointerCount == 1) {
-                        val velocity = velocityGet(it.id)?.y ?: 0f
-                        state.dispatchFling(velocity)
+                    if (pointerCount == 1) {
+                        if (isDrag) {
+                            val velocity = velocityGet(it.id)?.y ?: 0f
+                            state.dispatchFling(velocity)
+                        }
                     }
                 },
                 onFinish = {
