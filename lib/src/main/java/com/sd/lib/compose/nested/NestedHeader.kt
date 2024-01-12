@@ -153,14 +153,12 @@ private fun Modifier.headerGesture(
                     isDrag = false
                 },
                 onDown = {
-                    if (pointerCount == 1) {
-                        val cancelFling = state.cancelFling()
-                        val cancelContentFling = state.cancelContentFling()
-                        if (cancelFling || cancelContentFling) {
-                            it.consume()
-                            isDrag = true
-                            logMsg(debug) { "header drag" }
-                        }
+                    val cancelFling = state.cancelFling()
+                    val cancelContentFling = state.cancelContentFling()
+                    if (cancelFling || cancelContentFling) {
+                        it.consume()
+                        isDrag = true
+                        logMsg(debug) { "header drag" }
                     }
                     cancelPointer()
                 },
