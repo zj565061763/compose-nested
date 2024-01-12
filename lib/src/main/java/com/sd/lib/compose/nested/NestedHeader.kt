@@ -168,6 +168,8 @@ private fun Modifier.headerGesture(
                             cancelPointer()
                             return@fPointer
                         }
+
+                        logMsg(debug) { "header drag" }
                         isDrag = true
                     }
 
