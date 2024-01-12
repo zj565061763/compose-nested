@@ -172,8 +172,8 @@ private fun Modifier.headerGesture(
                         state.headerNestedScrollDispatcher.dispatchScroll(
                             available = Offset(0f, this.pan.y),
                             source = NestedScrollSource.Drag,
-                        ) {
-                            val leftValue = it.y
+                        ) { left ->
+                            val leftValue = left.y
                             when {
                                 leftValue < 0 -> state.dispatchHide(leftValue)
                                 leftValue > 0 -> state.dispatchShow(leftValue)

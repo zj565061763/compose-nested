@@ -109,7 +109,18 @@ internal class NestedHeaderState(
                 ) {
                     val delta = value - lastValue
                     lastValue = value
-                    headerNestedScrollDispatcher.dispatchScrollY(delta, NestedScrollSource.Fling)
+
+                    headerNestedScrollDispatcher.dispatchScroll(
+                        available = Offset(0f, delta),
+                        source = NestedScrollSource.Fling,
+                    ) { left ->
+                        val leftValue = left.y
+                        when {
+                            leftValue < 0 -> dispatchHide(leftValue)
+                            leftValue > 0 -> dispatchShow(leftValue)
+                            else -> false
+                        }
+                    }
                 }
             }
 
@@ -153,24 +164,6 @@ private class NestedScrollConnectionY(
     }
 }
 
-internal fun NestedScrollDispatcher.dispatchScrollY(
-    value: Float,
-    source: NestedScrollSource,
-) {
-    val available = Offset(0f, value)
-
-    val consumed = dispatchPreScroll(
-        available = available,
-        source = source,
-    ).consumedCoerceIn(available)
-
-    dispatchPostScroll(
-        consumed = Offset.Zero,
-        available = available - consumed,
-        source = source,
-    )
-}
-
 internal fun NestedScrollDispatcher.dispatchScroll(
     available: Offset,
     source: NestedScrollSource,
@@ -195,7 +188,7 @@ internal fun NestedScrollDispatcher.dispatchScroll(
     )
 }
 
-internal fun Offset.consumedCoerceIn(available: Offset): Offset {
+private fun Offset.consumedCoerceIn(available: Offset): Offset {
     val legalX = this.x.consumedCoerceIn(available.x)
     val legalY = this.y.consumedCoerceIn(available.y)
     return if (this.x == legalX && this.y == legalY) {
@@ -205,7 +198,7 @@ internal fun Offset.consumedCoerceIn(available: Offset): Offset {
     }
 }
 
-internal fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
+private fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
     val legalX = this.x.consumedCoerceIn(available.x)
     val legalY = this.y.consumedCoerceIn(available.y)
     return if (this.x == legalX && this.y == legalY) {
