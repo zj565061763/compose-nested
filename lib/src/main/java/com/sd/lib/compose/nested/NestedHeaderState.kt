@@ -1,7 +1,8 @@
 package com.sd.lib.compose.nested
 
+import androidx.compose.animation.SplineBasedFloatDecayAnimationSpec
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.exponentialDecay
+import androidx.compose.animation.core.generateDecayAnimationSpec
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -10,6 +11,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -30,6 +32,8 @@ internal class NestedHeaderState(
         private set
 
     var offset by mutableFloatStateOf(0f)
+
+    lateinit var density: Density
 
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
@@ -108,7 +112,7 @@ internal class NestedHeaderState(
                 var lastValue = _animFling.value
                 _animFling.animateDecay(
                     initialVelocity = left.y,
-                    animationSpec = exponentialDecay(frictionMultiplier = 1.5f),
+                    animationSpec = SplineBasedFloatDecayAnimationSpec(density).generateDecayAnimationSpec(),
                 ) {
                     val delta = value - lastValue
                     lastValue = value

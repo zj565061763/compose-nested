@@ -17,6 +17,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
@@ -34,6 +35,7 @@ fun FNestedHeader(
     val coroutineScope = rememberCoroutineScope()
     val state = remember(coroutineScope) { NestedHeaderState(coroutineScope) }.apply {
         this.debug = debug
+        this.density = LocalDensity.current
     }
 
     SubcomposeLayout(modifier = modifier) { cs ->
