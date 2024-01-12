@@ -22,12 +22,14 @@ internal class NestedHeaderState(
 
     var offset by mutableFloatStateOf(0f)
 
+    /** 当前容器是否被触摸 */
     var isTouch: Boolean = false
         set(value) {
             field = value
             if (value) cancelAnim()
         }
 
+    /** Header是否被触摸 */
     var isTouchHeader: Boolean = false
 
     private var _minOffset: Float = 0f
@@ -37,20 +39,28 @@ internal class NestedHeaderState(
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
     val headerNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
-        onPreScroll = { value, source ->
-            dispatchHide(value, source)
+        onPreScroll = { value, _ ->
+            dispatchHide(value)
         },
-        onPostScroll = { value, source ->
-            dispatchShow(value, source)
+        onPostScroll = { value, _ ->
+            dispatchShow(value)
         }
     )
 
     val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
-        onPreScroll = { value, source ->
-            dispatchHide(value, source)
+        onPreScroll = { value, _ ->
+            if (isTouchHeader) {
+                false
+            } else {
+                dispatchHide(value)
+            }
         },
-        onPostScroll = { value, source ->
-            dispatchShow(value, source)
+        onPostScroll = { value, _ ->
+            if (isTouchHeader) {
+                false
+            } else {
+                dispatchShow(value)
+            }
         }
     )
 
@@ -65,9 +75,8 @@ internal class NestedHeaderState(
         }
     }
 
-    fun dispatchHide(value: Float, source: NestedScrollSource): Boolean {
+    private fun dispatchHide(value: Float): Boolean {
         if (!isReady) return false
-        if (source == NestedScrollSource.Drag) cancelAnim()
         if (value < 0) {
             if (offset > _minOffset) {
                 val newOffset = offset + value
@@ -78,9 +87,8 @@ internal class NestedHeaderState(
         return false
     }
 
-    fun dispatchShow(value: Float, source: NestedScrollSource): Boolean {
+    private fun dispatchShow(value: Float): Boolean {
         if (!isReady) return false
-        if (source == NestedScrollSource.Drag) cancelAnim()
         if (value > 0) {
             if (offset < _maxOffset) {
                 val newOffset = offset + value
