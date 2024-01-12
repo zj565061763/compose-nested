@@ -63,7 +63,7 @@ internal class NestedHeaderState(
         }
     }
 
-    private fun dispatchHide(value: Float): Boolean {
+    fun dispatchHide(value: Float): Boolean {
         if (!isReady) return false
         if (value < 0) {
             if (offset > _minOffset) {
@@ -75,7 +75,7 @@ internal class NestedHeaderState(
         return false
     }
 
-    private fun dispatchShow(value: Float): Boolean {
+    fun dispatchShow(value: Float): Boolean {
         if (!isReady) return false
         if (value > 0) {
             if (offset < _maxOffset) {
@@ -171,7 +171,7 @@ internal fun NestedScrollDispatcher.dispatchScrollY(
     )
 }
 
-private fun Offset.consumedCoerceIn(available: Offset): Offset {
+internal fun Offset.consumedCoerceIn(available: Offset): Offset {
     val legalX = this.x.consumedCoerceIn(available.x)
     val legalY = this.y.consumedCoerceIn(available.y)
     return if (this.x == legalX && this.y == legalY) {
@@ -181,7 +181,7 @@ private fun Offset.consumedCoerceIn(available: Offset): Offset {
     }
 }
 
-private fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
+internal fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
     val legalX = this.x.consumedCoerceIn(available.x)
     val legalY = this.y.consumedCoerceIn(available.y)
     return if (this.x == legalX && this.y == legalY) {

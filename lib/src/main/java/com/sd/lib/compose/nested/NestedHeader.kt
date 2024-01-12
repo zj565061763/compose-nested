@@ -10,6 +10,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -163,8 +164,32 @@ private fun Modifier.headerGesture(
                             isDrag = true
                             logMsg(debug) { "header onCalculate" }
                         }
+
                         currentEvent.fConsume { it.positionChanged() }
-                        state.headerNestedScrollDispatcher.dispatchScrollY(this.pan.y, NestedScrollSource.Drag)
+
+                        val available = Offset(0f, this.pan.y)
+                        val dispatcher = state.headerNestedScrollDispatcher
+
+                        val preConsumed = dispatcher.dispatchPreScroll(
+                            available = available,
+                            source = NestedScrollSource.Drag,
+                        ).consumedCoerceIn(available)
+
+                        val left = available - preConsumed
+                        val leftValue = left.y
+
+                        val dispatch = when {
+                            leftValue < 0 -> state.dispatchHide(leftValue)
+                            leftValue > 0 -> state.dispatchShow(leftValue)
+                            else -> false
+                        }
+
+                        dispatcher.dispatchPostScroll(
+                            consumed = if (dispatch) left else Offset.Zero,
+                            available = if (dispatch) Offset.Zero else left,
+                            source = NestedScrollSource.Drag,
+                        )
+
                     } else {
                         if (!isDrag) {
                             logMsg(debug) { "header cancel consumed" }
