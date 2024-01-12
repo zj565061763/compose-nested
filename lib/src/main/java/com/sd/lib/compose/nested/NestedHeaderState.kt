@@ -145,10 +145,11 @@ private class NestedScrollConnectionY(
     }
 }
 
-internal fun NestedScrollDispatcher.dispatchScrollY(y: Float, source: NestedScrollSource) {
-    if (y == 0f) return
-
-    val available = Offset(0f, y)
+internal fun NestedScrollDispatcher.dispatchScrollY(
+    value: Float,
+    source: NestedScrollSource,
+) {
+    val available = Offset(0f, value)
 
     val consumed = dispatchPreScroll(
         available = available,

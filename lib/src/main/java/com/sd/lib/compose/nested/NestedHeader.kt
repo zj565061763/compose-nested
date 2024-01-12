@@ -137,12 +137,9 @@ private fun Modifier.headerGesture(
                             }
                         }
 
-                        val y = this.pan.y
-                        if (y == 0f) return@fPointer
-
                         isDrag = true
                         currentEvent.fConsume { it.positionChanged() }
-                        state.headerNestedScrollDispatcher.dispatchScrollY(y, NestedScrollSource.Drag)
+                        state.headerNestedScrollDispatcher.dispatchScrollY(this.pan.y, NestedScrollSource.Drag)
                     } else {
                         if (!isDrag) {
                             cancelPointer()
