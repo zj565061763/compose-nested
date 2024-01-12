@@ -158,8 +158,10 @@ private fun Modifier.headerGesture(
                 },
                 onCalculate = {
                     if (currentEvent.changes.any { it.positionChanged() }) {
-                        logMsg(debug) { "header onCalculate" }
-                        isDrag = true
+                        if (!isDrag) {
+                            isDrag = true
+                            logMsg(debug) { "header onCalculate" }
+                        }
                         currentEvent.fConsume { it.positionChanged() }
                         state.headerNestedScrollDispatcher.dispatchScrollY(this.pan.y, NestedScrollSource.Drag)
                     } else {
