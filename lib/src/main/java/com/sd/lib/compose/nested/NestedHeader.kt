@@ -23,6 +23,7 @@ import com.sd.lib.compose.gesture.fPointer
 @Composable
 fun FNestedHeader(
     modifier: Modifier = Modifier,
+    debug: Boolean = false,
     header: @Composable () -> Unit,
     content: @Composable () -> Unit,
 ) {
@@ -47,12 +48,23 @@ fun FNestedHeader(
         @Suppress("NAME_SHADOWING")
         val cs = cs.copy(minWidth = 0, minHeight = 0)
 
-        val headerPlaceable = (subcompose(SlotId.Header) { HeaderBox(state, header) }).let {
+        val headerPlaceable = (subcompose(SlotId.Header) {
+            HeaderBox(
+                state = state,
+                debug = debug,
+                header = header,
+            )
+        }).let {
             check(it.size == 1)
             it.first().measure(cs.copy(maxHeight = Constraints.Infinity))
         }
 
-        val contentPlaceable = (subcompose(SlotId.Content) { ContentBox(state, content) }).let {
+        val contentPlaceable = (subcompose(SlotId.Content) {
+            ContentBox(
+                state = state,
+                content = content,
+            )
+        }).let {
             check(it.size == 1)
             it.first().measure(cs)
         }
@@ -75,6 +87,10 @@ fun FNestedHeader(
             container = height,
         )
 
+        logMsg(debug) {
+            "header:${headerPlaceable.height} content:${contentPlaceable.height} container:${height}"
+        }
+
         layout(width, height) {
             val offset = state.offset.toInt()
             headerPlaceable.placeRelative(0, offset)
@@ -91,6 +107,7 @@ private enum class SlotId {
 @Composable
 private fun HeaderBox(
     state: NestedHeaderState,
+    debug: Boolean,
     header: @Composable () -> Unit,
 ) {
     Box(
@@ -102,7 +119,7 @@ private fun HeaderBox(
                     connection = object : NestedScrollConnection {},
                     dispatcher = state.headerNestedScrollDispatcher,
                 )
-                .headerGesture(state),
+                .headerGesture(state = state, debug = debug),
         ) {
             header()
         }
@@ -123,6 +140,7 @@ private fun ContentBox(
 
 private fun Modifier.headerGesture(
     state: NestedHeaderState,
+    debug: Boolean,
 ): Modifier {
     return composed {
 
@@ -131,20 +149,20 @@ private fun Modifier.headerGesture(
         if (state.isReady) {
             this.fPointer(
                 onStart = {
-                    logMsg { "header onStart" }
+                    logMsg(debug) { "header onStart" }
                     state.isTouchHeader = true
                     isDrag = false
                     calculatePan = true
                 },
                 onCalculate = {
                     if (currentEvent.changes.any { it.positionChanged() }) {
-                        logMsg { "header onCalculate" }
+                        logMsg(debug) { "header onCalculate" }
                         isDrag = true
                         currentEvent.fConsume { it.positionChanged() }
                         state.headerNestedScrollDispatcher.dispatchScrollY(this.pan.y, NestedScrollSource.Drag)
                     } else {
                         if (!isDrag) {
-                            logMsg { "header cancel consumed" }
+                            logMsg(debug) { "header cancel consumed" }
                             cancelPointer()
                         }
                     }
@@ -161,7 +179,7 @@ private fun Modifier.headerGesture(
                     }
                 },
                 onFinish = {
-                    logMsg { "header onFinish" }
+                    logMsg(debug) { "header onFinish" }
                     isDrag = false
                     state.isTouchHeader = false
                 }
@@ -173,7 +191,7 @@ private fun Modifier.headerGesture(
 }
 
 internal inline fun logMsg(
-    debug: Boolean = true,
+    debug: Boolean,
     block: () -> Any?
 ) {
     if (debug) {

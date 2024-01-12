@@ -37,6 +37,7 @@ private fun Content(
         modifier = modifier
             .fillMaxSize()
             .nestedScroll(nestedScrollConnection),
+        debug = true,
         header = {
             HeaderView()
         }
