@@ -1,5 +1,6 @@
 package com.sd.lib.compose.nested
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -161,4 +162,11 @@ private fun Modifier.headerGesture(
             this
         }
     }
+}
+
+internal inline fun logMsg(
+    debug: Boolean = false,
+    block: () -> Any?
+) {
+    Log.i("FNestedHeader", block().toString())
 }
