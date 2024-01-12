@@ -128,15 +128,21 @@ private fun ContentBox(
     Box(
         modifier = Modifier
             .nestedScroll(state.contentNestedScrollConnection)
-            .fPointer(
-                pass = PointerEventPass.Initial,
-                onDown = { input ->
-                    if (state.cancelFling()) {
-                        input.consume()
-                    }
-                    cancelPointer()
-                },
-            )
+            .let { m ->
+                if (state.isReady) {
+                    m.fPointer(
+                        pass = PointerEventPass.Initial,
+                        onDown = { input ->
+                            if (state.cancelFling()) {
+                                input.consume()
+                            }
+                            cancelPointer()
+                        },
+                    )
+                } else {
+                    m
+                }
+            }
     ) {
         content()
     }
