@@ -40,13 +40,6 @@ fun VerticalListView(
                 Text(text = index.toString())
             }
         }
-
-        item(
-            key = "HorizontalListView",
-            contentType = "HorizontalListView",
-        ) {
-            HorizontalListView(height = 500.dp)
-        }
     }
 }
 

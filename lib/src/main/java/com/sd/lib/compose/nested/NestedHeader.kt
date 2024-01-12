@@ -156,34 +156,32 @@ private fun Modifier.headerGesture(
                     calculatePan = true
                 },
                 onCalculate = {
-                    if (currentEvent.changes.any { it.positionChanged() }) {
-                        if (!isDrag) {
-                            if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                                logMsg(debug) { "header cancel x >= y" }
-                                cancelPointer()
-                                return@fPointer
-                            }
-                            isDrag = true
-                            logMsg(debug) { "header onCalculate" }
-                        }
-
-                        currentEvent.fConsume { it.positionChanged() }
-
-                        state.headerNestedScrollDispatcher.dispatchScroll(
-                            available = Offset(0f, this.pan.y),
-                            source = NestedScrollSource.Drag,
-                        ) { left ->
-                            val leftValue = left.y
-                            when {
-                                leftValue < 0 -> state.dispatchHide(leftValue)
-                                leftValue > 0 -> state.dispatchShow(leftValue)
-                                else -> false
-                            }
-                        }
-                    } else {
-                        if (!isDrag) {
+                    if (!isDrag) {
+                        val positionChanged = currentEvent.changes.any { it.positionChanged() }
+                        if (!positionChanged) {
                             logMsg(debug) { "header cancel consumed" }
                             cancelPointer()
+                            return@fPointer
+                        }
+                        if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                            logMsg(debug) { "header cancel x >= y" }
+                            cancelPointer()
+                            return@fPointer
+                        }
+                        isDrag = true
+                    }
+
+                    currentEvent.fConsume { it.positionChanged() }
+
+                    state.headerNestedScrollDispatcher.dispatchScroll(
+                        available = Offset(0f, this.pan.y),
+                        source = NestedScrollSource.Drag,
+                    ) { left ->
+                        val leftValue = left.y
+                        when {
+                            leftValue < 0 -> state.dispatchHide(leftValue)
+                            leftValue > 0 -> state.dispatchShow(leftValue)
+                            else -> false
                         }
                     }
                 },
