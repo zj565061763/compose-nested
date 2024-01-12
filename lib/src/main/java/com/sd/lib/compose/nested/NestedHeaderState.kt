@@ -89,6 +89,7 @@ internal class NestedHeaderState(
     }
 
     fun dispatchFling(velocity: Float) {
+        if (!isReady) return
         if (velocity.absoluteValue < 100) return
         coroutineScope.launch {
             val uuid = if (debug) UUID.randomUUID().toString() else ""
