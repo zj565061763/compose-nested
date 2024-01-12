@@ -147,12 +147,10 @@ private fun Modifier.headerGesture(
         var isDrag by remember { mutableStateOf(false) }
 
         if (state.isReady) {
-            this.fPointer(
-                touchSlop = 0f,
+            fPointer(
+                pass = PointerEventPass.Initial,
                 onStart = {
-                    logMsg(debug) { "header start" }
                     isDrag = false
-                    calculatePan = true
                 },
                 onDown = {
                     if (pointerCount == 1) {
@@ -164,6 +162,13 @@ private fun Modifier.headerGesture(
                             logMsg(debug) { "header drag" }
                         }
                     }
+                    cancelPointer()
+                },
+            ).fPointer(
+                touchSlop = 0f,
+                onStart = {
+                    logMsg(debug) { "header start isDrag:${isDrag}" }
+                    calculatePan = true
                 },
                 onCalculate = {
                     if (!isDrag) {
@@ -209,7 +214,6 @@ private fun Modifier.headerGesture(
                 },
                 onFinish = {
                     logMsg(debug) { "header finish" }
-                    isDrag = false
                 }
             )
         } else {
