@@ -99,9 +99,10 @@ internal class NestedHeaderState(
 
             val left = available - consumed
             if (left != Velocity.Zero) {
-                var lastValue = offset
                 _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
                 _animFling.snapTo(offset)
+
+                var lastValue = _animFling.value
                 _animFling.animateDecay(
                     initialVelocity = left.y,
                     animationSpec = exponentialDecay(frictionMultiplier = 2f),
