@@ -127,7 +127,7 @@ private fun ContentBox(
             .fPointer(
                 pass = PointerEventPass.Initial,
                 onDown = { input ->
-                    if (pointerCount == 1 && state.cancelFling()) {
+                    if (state.cancelFling()) {
                         input.consume()
                     }
                     cancelPointer()
