@@ -148,6 +148,7 @@ private fun Modifier.headerGesture(
 
         if (state.isReady) {
             this.fPointer(
+                touchSlop = 0f,
                 onStart = {
                     logMsg(debug) { "header onStart" }
                     state.isTouchHeader = true
