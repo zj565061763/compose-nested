@@ -55,12 +55,14 @@ private fun HeaderView(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(500.dp)
+                .height(300.dp)
                 .background(Color.Red)
                 .clickable {
                     logMsg { "click" }
                 }
         )
+
+        HorizontalListView(count = 50)
 
         Box(
             modifier = Modifier
