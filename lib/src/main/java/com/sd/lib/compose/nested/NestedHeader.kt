@@ -168,5 +168,7 @@ internal inline fun logMsg(
     debug: Boolean = false,
     block: () -> Any?
 ) {
-    Log.i("FNestedHeader", block().toString())
+    if (debug) {
+        Log.i("FNestedHeader", block().toString())
+    }
 }
