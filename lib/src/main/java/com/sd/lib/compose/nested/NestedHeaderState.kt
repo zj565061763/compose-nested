@@ -38,14 +38,14 @@ internal class NestedHeaderState(
     val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
         onPreScroll = { value, _ ->
             if (isTouchHeader) {
-                false
+                true
             } else {
                 dispatchHide(value)
             }
         },
         onPostScroll = { value, _ ->
             if (isTouchHeader) {
-                false
+                true
             } else {
                 dispatchShow(value)
             }
