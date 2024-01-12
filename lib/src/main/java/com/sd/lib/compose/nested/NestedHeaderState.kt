@@ -25,6 +25,8 @@ internal class NestedHeaderState(
     /** Header是否被触摸 */
     var isTouchHeader: Boolean = false
 
+    var debug: Boolean = false
+
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
 

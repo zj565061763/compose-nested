@@ -30,8 +30,8 @@ fun FNestedHeader(
     content: @Composable () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val state by remember(coroutineScope) {
-        mutableStateOf(NestedHeaderState(coroutineScope))
+    val state = remember(coroutineScope) { NestedHeaderState(coroutineScope) }.apply {
+        this.debug = debug
     }
 
     SubcomposeLayout(
