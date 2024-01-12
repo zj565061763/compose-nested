@@ -138,11 +138,12 @@ internal class NestedHeaderState(
         }
     }
 
-    fun cancelContentFling() {
-        _contentFlingContext?.let {
-            if (it.isActive) {
+    fun cancelContentFling(): Boolean {
+        val context = _contentFlingContext ?: return false
+        return context.isActive.also { isActive ->
+            if (isActive) {
                 logMsg(debug) { "content fling cancel" }
-                it.cancel()
+                context.cancel()
             }
             _contentFlingContext = null
         }
