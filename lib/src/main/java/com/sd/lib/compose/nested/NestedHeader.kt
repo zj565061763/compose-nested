@@ -121,15 +121,18 @@ private fun Modifier.headerGesture(
         if (state.isReady) {
             this.fPointer(
                 onStart = {
+                    logMsg { "onStart" }
                     state.isHeaderTouch = true
                     isDrag = false
                     calculatePan = true
                 },
                 onCalculate = {
                     if (currentEvent.changes.any { it.positionChanged() }) {
+                        logMsg { "onCalculate" }
                         if (!isDrag) {
                             if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
                                 cancelPointer()
+                                logMsg { "onCalculate cancel" }
                                 return@fPointer
                             }
                         }
@@ -140,6 +143,10 @@ private fun Modifier.headerGesture(
                         isDrag = true
                         currentEvent.fConsume { it.positionChanged() }
                         state.headerNestedScrollDispatcher.dispatchScrollY(y, NestedScrollSource.Drag)
+                    } else {
+                        if (!isDrag) {
+                            cancelPointer()
+                        }
                     }
                 },
                 onMove = {
@@ -154,6 +161,7 @@ private fun Modifier.headerGesture(
                     }
                 },
                 onFinish = {
+                    logMsg { "onFinish" }
                     isDrag = false
                     state.isHeaderTouch = false
                 }
@@ -165,7 +173,7 @@ private fun Modifier.headerGesture(
 }
 
 internal inline fun logMsg(
-    debug: Boolean = false,
+    debug: Boolean = true,
     block: () -> Any?
 ) {
     if (debug) {
