@@ -168,29 +168,17 @@ private fun Modifier.headerGesture(
 
                         currentEvent.fConsume { it.positionChanged() }
 
-                        val available = Offset(0f, this.pan.y)
-                        val dispatcher = state.headerNestedScrollDispatcher
-
-                        val preConsumed = dispatcher.dispatchPreScroll(
-                            available = available,
+                        state.headerNestedScrollDispatcher.dispatchScroll(
+                            available = Offset(0f, this.pan.y),
                             source = NestedScrollSource.Drag,
-                        ).consumedCoerceIn(available)
-
-                        val left = available - preConsumed
-                        val leftValue = left.y
-
-                        val dispatch = when {
-                            leftValue < 0 -> state.dispatchHide(leftValue)
-                            leftValue > 0 -> state.dispatchShow(leftValue)
-                            else -> false
+                        ) {
+                            val leftValue = it.y
+                            when {
+                                leftValue < 0 -> state.dispatchHide(leftValue)
+                                leftValue > 0 -> state.dispatchShow(leftValue)
+                                else -> false
+                            }
                         }
-
-                        dispatcher.dispatchPostScroll(
-                            consumed = if (dispatch) left else Offset.Zero,
-                            available = if (dispatch) Offset.Zero else left,
-                            source = NestedScrollSource.Drag,
-                        )
-
                     } else {
                         if (!isDrag) {
                             logMsg(debug) { "header cancel consumed" }

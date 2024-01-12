@@ -171,6 +171,30 @@ internal fun NestedScrollDispatcher.dispatchScrollY(
     )
 }
 
+internal fun NestedScrollDispatcher.dispatchScroll(
+    available: Offset,
+    source: NestedScrollSource,
+    onScroll: (Offset) -> Boolean,
+) {
+    val preConsumed = dispatchPreScroll(
+        available = available,
+        source = source,
+    ).consumedCoerceIn(available)
+
+    val left = available - preConsumed
+    val isConsumed = if (left != Offset.Zero) {
+        onScroll(left)
+    } else {
+        false
+    }
+
+    dispatchPostScroll(
+        consumed = if (isConsumed) left else Offset.Zero,
+        available = if (isConsumed) Offset.Zero else left,
+        source = source,
+    )
+}
+
 internal fun Offset.consumedCoerceIn(available: Offset): Offset {
     val legalX = this.x.consumedCoerceIn(available.x)
     val legalY = this.y.consumedCoerceIn(available.y)
