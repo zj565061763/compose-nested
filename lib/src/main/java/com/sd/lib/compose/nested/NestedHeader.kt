@@ -19,7 +19,6 @@ import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
 import com.sd.lib.compose.gesture.fConsume
 import com.sd.lib.compose.gesture.fPointer
-import kotlin.math.absoluteValue
 
 @Composable
 fun FNestedHeader(
@@ -140,14 +139,6 @@ private fun Modifier.headerGesture(
                 onCalculate = {
                     if (currentEvent.changes.any { it.positionChanged() }) {
                         logMsg { "header onCalculate" }
-                        if (!isDrag) {
-                            if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                                cancelPointer()
-                                logMsg { "header cancel x >= y" }
-                                return@fPointer
-                            }
-                        }
-
                         isDrag = true
                         currentEvent.fConsume { it.positionChanged() }
                         state.headerNestedScrollDispatcher.dispatchScrollY(this.pan.y, NestedScrollSource.Drag)
