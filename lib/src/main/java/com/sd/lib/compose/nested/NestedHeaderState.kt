@@ -105,7 +105,7 @@ internal class NestedHeaderState(
                 var lastValue = _animFling.value
                 _animFling.animateDecay(
                     initialVelocity = left.y,
-                    animationSpec = exponentialDecay(frictionMultiplier = 2f),
+                    animationSpec = exponentialDecay(frictionMultiplier = 1.5f),
                 ) {
                     val delta = value - lastValue
                     lastValue = value
