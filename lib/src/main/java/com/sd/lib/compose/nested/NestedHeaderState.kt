@@ -28,7 +28,6 @@ internal class NestedHeaderState(
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
 
-    val isFling: Boolean get() = _animFling.isRunning
     private val _animFling = Animatable(0f)
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
