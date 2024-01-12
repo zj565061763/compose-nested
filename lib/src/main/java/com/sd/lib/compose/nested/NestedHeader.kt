@@ -155,6 +155,13 @@ private fun Modifier.headerGesture(
                     isDrag = false
                     calculatePan = true
                 },
+                onDown = {
+                    if (pointerCount == 1 && state.cancelFling()) {
+                        it.consume()
+                        isDrag = true
+                        logMsg(debug) { "header drag" }
+                    }
+                },
                 onCalculate = {
                     if (!isDrag) {
                         val positionChanged = currentEvent.changes.any { it.positionChanged() }
@@ -168,9 +175,8 @@ private fun Modifier.headerGesture(
                             cancelPointer()
                             return@fPointer
                         }
-
-                        logMsg(debug) { "header drag" }
                         isDrag = true
+                        logMsg(debug) { "header drag" }
                     }
 
                     currentEvent.fConsume { it.positionChanged() }
