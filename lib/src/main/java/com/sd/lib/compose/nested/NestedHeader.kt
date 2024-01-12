@@ -114,18 +114,14 @@ private fun HeaderBox(
     header: @Composable () -> Unit,
 ) {
     Box(
-        modifier = Modifier.nestedScroll(state.headerNestedScrollConnection)
+        modifier = Modifier
+            .nestedScroll(
+                connection = object : NestedScrollConnection {},
+                dispatcher = state.headerNestedScrollDispatcher,
+            )
+            .headerGesture(state = state, debug = debug),
     ) {
-        Box(
-            modifier = Modifier
-                .nestedScroll(
-                    connection = object : NestedScrollConnection {},
-                    dispatcher = state.headerNestedScrollDispatcher,
-                )
-                .headerGesture(state = state, debug = debug),
-        ) {
-            header()
-        }
+        header()
     }
 }
 

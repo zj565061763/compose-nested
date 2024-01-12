@@ -34,14 +34,6 @@ internal class NestedHeaderState(
     private val _animFling = Animatable(0f)
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
-    val headerNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
-        onPreScroll = { value, _ ->
-            dispatchHide(value)
-        },
-        onPostScroll = { value, _ ->
-            dispatchShow(value)
-        }
-    )
 
     val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
         onPreScroll = { value, _ ->
