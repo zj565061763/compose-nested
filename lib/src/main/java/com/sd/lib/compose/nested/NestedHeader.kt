@@ -157,7 +157,8 @@ private fun Modifier.headerGesture(
                 onCalculate = {
                     if (currentEvent.changes.any { it.positionChanged() }) {
                         if (!isDrag) {
-                            if (this.pan.x.absoluteValue > this.pan.y.absoluteValue) {
+                            if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                                logMsg(debug) { "header cancel x >= y" }
                                 cancelPointer()
                                 return@fPointer
                             }
