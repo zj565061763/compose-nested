@@ -121,8 +121,8 @@ internal class NestedHeaderState(
                 }
             }
 
-            headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
-            logMsg(debug) { "fling end $uuid" }
+            val postConsumed = headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
+            logMsg(debug) { "fling end postConsumed:${postConsumed.y} $uuid" }
         }
     }
 
