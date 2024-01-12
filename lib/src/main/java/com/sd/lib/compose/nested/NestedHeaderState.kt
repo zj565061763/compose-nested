@@ -123,6 +123,7 @@ internal class NestedHeaderState(
         return _animFling.isRunning.also { isRunning ->
             if (isRunning) {
                 coroutineScope.launch {
+                    logMsg(debug) { "cancel fling" }
                     _animFling.stop()
                 }
             }
