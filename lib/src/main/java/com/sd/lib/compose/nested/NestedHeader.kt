@@ -151,15 +151,17 @@ private fun Modifier.headerGesture(
                 touchSlop = 0f,
                 onStart = {
                     logMsg(debug) { "header onStart" }
-                    state.isTouchHeader = true
                     isDrag = false
                     calculatePan = true
                 },
                 onDown = {
-                    if (pointerCount == 1 && state.cancelFling()) {
-                        it.consume()
-                        isDrag = true
-                        logMsg(debug) { "header drag" }
+                    if (pointerCount == 1) {
+                        state.cancelContentFling()
+                        if (state.cancelFling()) {
+                            it.consume()
+                            isDrag = true
+                            logMsg(debug) { "header drag" }
+                        }
                     }
                 },
                 onCalculate = {
@@ -207,7 +209,6 @@ private fun Modifier.headerGesture(
                 onFinish = {
                     logMsg(debug) { "header onFinish" }
                     isDrag = false
-                    state.isTouchHeader = false
                 }
             )
         } else {

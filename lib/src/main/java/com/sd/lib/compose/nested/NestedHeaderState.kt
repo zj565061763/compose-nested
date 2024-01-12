@@ -12,21 +12,22 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 internal class NestedHeaderState(
     private val coroutineScope: CoroutineScope,
 ) {
+    var debug: Boolean = false
+
     var isReady by mutableStateOf(false)
         private set
 
     var offset by mutableFloatStateOf(0f)
-
-    /** Header是否被触摸 */
-    var isTouchHeader: Boolean = false
-
-    var debug: Boolean = false
 
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
@@ -35,20 +36,17 @@ internal class NestedHeaderState(
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
 
+    private var _contentFlingContext: CoroutineContext? = null
     val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
         onPreScroll = { value, _ ->
-            if (isTouchHeader) {
-                true
-            } else {
-                dispatchHide(value)
-            }
+            dispatchHide(value)
         },
         onPostScroll = { value, _ ->
-            if (isTouchHeader) {
-                true
-            } else {
-                dispatchShow(value)
-            }
+            dispatchShow(value)
+        },
+        onPreFling = {
+            _contentFlingContext = currentCoroutineContext()
+            false
         }
     )
 
@@ -139,11 +137,22 @@ internal class NestedHeaderState(
             }
         }
     }
+
+    fun cancelContentFling() {
+        _contentFlingContext?.let {
+            if (it.isActive) {
+                logMsg(debug) { "content fling cancel" }
+                it.cancel()
+            }
+            _contentFlingContext = null
+        }
+    }
 }
 
 private class NestedScrollConnectionY(
     val onPreScroll: (Float, NestedScrollSource) -> Boolean,
     val onPostScroll: (Float, NestedScrollSource) -> Boolean,
+    val onPreFling: suspend (Float) -> Boolean,
 ) : NestedScrollConnection {
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
         val y = available.y
@@ -160,6 +169,15 @@ private class NestedScrollConnectionY(
             available.copy(y = y)
         } else {
             super.onPostScroll(consumed, available, source)
+        }
+    }
+
+    override suspend fun onPreFling(available: Velocity): Velocity {
+        val y = available.y
+        return if (onPreFling(y)) {
+            available.copy(y = y)
+        } else {
+            super.onPreFling(available)
         }
     }
 }
