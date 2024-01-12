@@ -80,7 +80,7 @@ private fun HeaderView(
                 .height(300.dp)
                 .background(Color.Red)
                 .clickable {
-                    logMsg { "click" }
+                    logMsg { "click Red" }
                 }
         )
 
@@ -98,6 +98,9 @@ private fun HeaderView(
                 .fillMaxWidth()
                 .height(500.dp)
                 .background(Color.Blue)
+                .clickable {
+                    logMsg { "click Blue" }
+                }
         )
     }
 }
