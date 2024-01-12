@@ -35,7 +35,9 @@ fun FNestedHeader(
     SubcomposeLayout(
         modifier = modifier.fPointer(
             pass = PointerEventPass.Initial,
-            onStart = { state.cancelAnim() },
+            onDown = {
+                state.cancelFling()
+            },
         )
     ) { cs ->
         val hasFixedWidth = cs.hasFixedWidth

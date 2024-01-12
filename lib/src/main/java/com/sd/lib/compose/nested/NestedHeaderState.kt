@@ -28,7 +28,7 @@ internal class NestedHeaderState(
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
 
-    private val _anim = Animatable(0f)
+    private val _animFling = Animatable(0f)
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
     val headerNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
@@ -100,9 +100,9 @@ internal class NestedHeaderState(
             val left = available - consumed
             if (left != Velocity.Zero) {
                 var lastValue = offset
-                _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
-                _anim.snapTo(offset)
-                _anim.animateDecay(
+                _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
+                _animFling.snapTo(offset)
+                _animFling.animateDecay(
                     initialVelocity = left.y,
                     animationSpec = exponentialDecay(frictionMultiplier = 2f),
                 ) {
@@ -116,10 +116,10 @@ internal class NestedHeaderState(
         }
     }
 
-    fun cancelAnim() {
-        if (_anim.isRunning) {
+    fun cancelFling() {
+        if (_animFling.isRunning) {
             coroutineScope.launch {
-                _anim.stop()
+                _animFling.stop()
             }
         }
     }
