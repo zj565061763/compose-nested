@@ -101,10 +101,10 @@ internal class NestedHeaderState(
             logMsg(debug) { "fling start velocity:${velocity} $uuid" }
 
             val available = Velocity(0f, velocity)
-            val consumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
+            val preConsumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
 
-            val left = available - consumed
-            logMsg(debug) { "fling consumed:${consumed.y} left:${left.y} $uuid" }
+            val left = available - preConsumed
+            logMsg(debug) { "fling preConsumed:${preConsumed.y} left:${left.y} $uuid" }
 
             if (left != Velocity.Zero) {
                 _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
