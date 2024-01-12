@@ -104,14 +104,18 @@ private fun HeaderBox(
     debug: Boolean,
     header: @Composable () -> Unit,
 ) {
-    Box(
-        modifier = Modifier
+    val headerModifier = if (state.isReady) {
+        Modifier
+            .headerGesture(state = state, debug = debug)
             .nestedScroll(
                 connection = object : NestedScrollConnection {},
                 dispatcher = state.headerNestedScrollDispatcher,
             )
-            .headerGesture(state = state, debug = debug),
-    ) {
+    } else {
+        Modifier
+    }
+
+    Box(modifier = headerModifier) {
         header()
     }
 }
@@ -141,85 +145,79 @@ private fun ContentBox(
 private fun Modifier.headerGesture(
     state: NestedHeaderState,
     debug: Boolean,
-): Modifier {
-    return composed {
+): Modifier = composed {
 
-        var isDrag by remember { mutableStateOf(false) }
+    var isDrag by remember { mutableStateOf(false) }
 
-        if (state.isReady) {
-            fPointer(
-                pass = PointerEventPass.Initial,
-                onStart = {
-                    isDrag = false
-                },
-                onDown = {
-                    val cancelFling = state.cancelFling()
-                    val cancelContentFling = state.cancelContentFling()
-                    if (cancelFling || cancelContentFling) {
-                        it.consume()
-                        isDrag = true
-                        logMsg(debug) { "header drag" }
-                    }
+    fPointer(
+        pass = PointerEventPass.Initial,
+        onStart = {
+            isDrag = false
+        },
+        onDown = {
+            val cancelFling = state.cancelFling()
+            val cancelContentFling = state.cancelContentFling()
+            if (cancelFling || cancelContentFling) {
+                it.consume()
+                isDrag = true
+                logMsg(debug) { "header drag" }
+            }
+            cancelPointer()
+        },
+    ).fPointer(
+        touchSlop = 0f,
+        onStart = {
+            logMsg(debug) { "header start isDrag:${isDrag}" }
+            calculatePan = true
+        },
+        onCalculate = {
+            if (!isDrag) {
+                val positionChanged = currentEvent.changes.any { it.positionChanged() }
+                if (!positionChanged) {
+                    logMsg(debug) { "header cancel consumed" }
                     cancelPointer()
-                },
-            ).fPointer(
-                touchSlop = 0f,
-                onStart = {
-                    logMsg(debug) { "header start isDrag:${isDrag}" }
-                    calculatePan = true
-                },
-                onCalculate = {
-                    if (!isDrag) {
-                        val positionChanged = currentEvent.changes.any { it.positionChanged() }
-                        if (!positionChanged) {
-                            logMsg(debug) { "header cancel consumed" }
-                            cancelPointer()
-                            return@fPointer
-                        }
-                        if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                            logMsg(debug) { "header cancel x >= y" }
-                            cancelPointer()
-                            return@fPointer
-                        }
-                        isDrag = true
-                        logMsg(debug) { "header drag" }
-                    }
-
-                    currentEvent.fConsume { it.positionChanged() }
-
-                    state.headerNestedScrollDispatcher.dispatchScroll(
-                        available = Offset(0f, this.pan.y),
-                        source = NestedScrollSource.Drag,
-                    ) { left ->
-                        val leftValue = left.y
-                        when {
-                            leftValue < 0 -> state.dispatchHide(leftValue)
-                            leftValue > 0 -> state.dispatchShow(leftValue)
-                            else -> false
-                        }
-                    }
-                },
-                onMove = {
-                    if (isDrag) {
-                        velocityAdd(it)
-                    }
-                },
-                onUp = {
-                    if (pointerCount == 1) {
-                        if (isDrag) {
-                            val velocity = velocityGet(it.id)?.y ?: 0f
-                            state.dispatchFling(velocity)
-                        }
-                    }
-                },
-                onFinish = {
-                    logMsg(debug) { "header finish" }
+                    return@fPointer
                 }
-            )
-        } else {
-            this
+                if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                    logMsg(debug) { "header cancel x >= y" }
+                    cancelPointer()
+                    return@fPointer
+                }
+                isDrag = true
+                logMsg(debug) { "header drag" }
+            }
+
+            currentEvent.fConsume { it.positionChanged() }
+
+            state.headerNestedScrollDispatcher.dispatchScroll(
+                available = Offset(0f, this.pan.y),
+                source = NestedScrollSource.Drag,
+            ) { left ->
+                val leftValue = left.y
+                when {
+                    leftValue < 0 -> state.dispatchHide(leftValue)
+                    leftValue > 0 -> state.dispatchShow(leftValue)
+                    else -> false
+                }
+            }
+        },
+        onMove = {
+            if (isDrag) {
+                velocityAdd(it)
+            }
+        },
+        onUp = {
+            if (pointerCount == 1) {
+                if (isDrag) {
+                    val velocity = velocityGet(it.id)?.y ?: 0f
+                    state.dispatchFling(velocity)
+                }
+            }
+        },
+        onFinish = {
+            logMsg(debug) { "header finish" }
         }
-    }
+    )
 }
 
 internal inline fun logMsg(
