@@ -13,6 +13,7 @@ import androidx.compose.ui.composed
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.positionChanged
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.unit.Constraints
@@ -31,7 +32,13 @@ fun FNestedHeader(
         mutableStateOf(NestedHeaderState(coroutineScope))
     }
 
-    SubcomposeLayout(modifier = modifier) { cs ->
+    SubcomposeLayout(
+        modifier = modifier.fPointer(
+            pass = PointerEventPass.Initial,
+            onStart = { state.isTouch = true },
+            onFinish = { state.isTouch = false },
+        )
+    ) { cs ->
         val hasFixedWidth = cs.hasFixedWidth
         val hasFixedHeight = cs.hasFixedHeight
         @Suppress("NAME_SHADOWING")
@@ -121,18 +128,18 @@ private fun Modifier.headerGesture(
         if (state.isReady) {
             this.fPointer(
                 onStart = {
-                    logMsg { "fPointer onStart" }
-                    state.isHeaderTouch = true
+                    logMsg { "header onStart" }
+                    state.isTouchHeader = true
                     isDrag = false
                     calculatePan = true
                 },
                 onCalculate = {
                     if (currentEvent.changes.any { it.positionChanged() }) {
-                        logMsg { "fPointer onCalculate" }
+                        logMsg { "header onCalculate" }
                         if (!isDrag) {
                             if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
                                 cancelPointer()
-                                logMsg { "fPointer cancel x >= y" }
+                                logMsg { "header cancel x >= y" }
                                 return@fPointer
                             }
                         }
@@ -142,7 +149,7 @@ private fun Modifier.headerGesture(
                         state.headerNestedScrollDispatcher.dispatchScrollY(this.pan.y, NestedScrollSource.Drag)
                     } else {
                         if (!isDrag) {
-                            logMsg { "fPointer cancel consumed" }
+                            logMsg { "header cancel consumed" }
                             cancelPointer()
                         }
                     }
@@ -159,9 +166,9 @@ private fun Modifier.headerGesture(
                     }
                 },
                 onFinish = {
-                    logMsg { "onFinish" }
+                    logMsg { "header onFinish" }
                     isDrag = false
-                    state.isHeaderTouch = false
+                    state.isTouchHeader = false
                 }
             )
         } else {
