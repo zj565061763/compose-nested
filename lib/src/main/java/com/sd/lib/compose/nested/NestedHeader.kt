@@ -62,7 +62,7 @@ fun FNestedHeader(
         val height = if (hasFixedHeight) {
             cs.maxHeight
         } else {
-            maxOf(headerPlaceable.height, contentPlaceable.height).coerceAtMost(cs.maxHeight)
+            (headerPlaceable.height + contentPlaceable.height).coerceAtMost(cs.maxHeight)
         }
 
         state.setSize(
