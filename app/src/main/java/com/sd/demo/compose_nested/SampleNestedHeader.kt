@@ -84,7 +84,7 @@ private fun HeaderView(
                 }
         )
 
-        HorizontalListView(count = 50)
+        HorizontalListView()
 
         Box(
             modifier = Modifier

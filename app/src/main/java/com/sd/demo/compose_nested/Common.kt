@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 
@@ -39,13 +40,21 @@ fun VerticalListView(
                 Text(text = index.toString())
             }
         }
+
+        item(
+            key = "HorizontalListView",
+            contentType = "HorizontalListView",
+        ) {
+            HorizontalListView(height = 500.dp)
+        }
     }
 }
 
 @Composable
 fun HorizontalListView(
     modifier: Modifier = Modifier,
-    count: Int,
+    count: Int = 50,
+    height: Dp = 200.dp,
 ) {
     val context = LocalContext.current
     LazyRow(
@@ -58,7 +67,7 @@ fun HorizontalListView(
                 onClick = {
                     Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
                 },
-                modifier = Modifier.height(200.dp)
+                modifier = Modifier.height(height)
             ) {
                 Text(text = index.toString())
             }
