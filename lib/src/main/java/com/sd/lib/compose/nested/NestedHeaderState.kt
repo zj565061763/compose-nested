@@ -19,6 +19,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.absoluteValue
 
 internal class NestedHeaderState(
     private val coroutineScope: CoroutineScope,
@@ -88,6 +89,7 @@ internal class NestedHeaderState(
     }
 
     fun dispatchFling(velocity: Float) {
+        if (velocity.absoluteValue < 100) return
         coroutineScope.launch {
             val uuid = if (debug) UUID.randomUUID().toString() else ""
             logMsg(debug) { "fling start velocity:${velocity} $uuid" }
