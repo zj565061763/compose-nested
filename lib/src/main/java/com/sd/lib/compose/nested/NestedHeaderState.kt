@@ -28,6 +28,7 @@ internal class NestedHeaderState(
     private var _minOffset: Float = 0f
     private val _maxOffset: Float = 0f
 
+    val isFling: Boolean get() = _animFling.isRunning
     private val _animFling = Animatable(0f)
 
     val headerNestedScrollDispatcher = NestedScrollDispatcher()
@@ -116,10 +117,12 @@ internal class NestedHeaderState(
         }
     }
 
-    fun cancelFling() {
-        if (_animFling.isRunning) {
-            coroutineScope.launch {
-                _animFling.stop()
+    fun cancelFling(): Boolean {
+        return _animFling.isRunning.also { isRunning ->
+            if (isRunning) {
+                coroutineScope.launch {
+                    _animFling.stop()
+                }
             }
         }
     }

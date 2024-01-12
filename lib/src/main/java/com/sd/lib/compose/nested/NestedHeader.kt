@@ -35,8 +35,11 @@ fun FNestedHeader(
     SubcomposeLayout(
         modifier = modifier.fPointer(
             pass = PointerEventPass.Initial,
-            onDown = {
-                state.cancelFling()
+            onDown = { input ->
+                if (pointerCount == 1 && state.cancelFling()) {
+                    input.consume()
+                }
+                cancelPointer()
             },
         )
     ) { cs ->
