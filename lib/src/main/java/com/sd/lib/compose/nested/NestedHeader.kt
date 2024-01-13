@@ -191,11 +191,7 @@ private fun Modifier.headerGesture(
                     cancelPointer()
                     return@fPointer
                 }
-                hasDrag = true
-                logMsg(debug) { "header drag" }
             }
-
-            currentEvent.fConsume { it.positionChanged() }
 
             state.headerNestedScrollDispatcher.dispatchScroll(
                 available = Offset(0f, this.pan.y),
@@ -206,7 +202,18 @@ private fun Modifier.headerGesture(
                     leftValue < 0 -> state.dispatchHide(leftValue)
                     leftValue > 0 -> state.dispatchShow(leftValue)
                     else -> false
+                }.also { dispatch ->
+                    if (dispatch) {
+                        if (!hasDrag) {
+                            hasDrag = true
+                            logMsg(debug) { "header drag" }
+                        }
+                    }
                 }
+            }
+
+            if (hasDrag) {
+                currentEvent.fConsume { it.positionChanged() }
             }
         },
         onMove = {
