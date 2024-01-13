@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import com.sd.lib.compose.gesture.fConsume
+import com.sd.lib.compose.gesture.fHasConsumedPositionChange
 import com.sd.lib.compose.gesture.fPointer
 import kotlin.math.absoluteValue
 
@@ -179,7 +180,7 @@ private fun Modifier.headerGesture(
             calculatePan = true
         },
         onCalculate = {
-            if (!currentEvent.changes.any { it.positionChanged() }) {
+            if (currentEvent.fHasConsumedPositionChange()) {
                 logMsg(debug) { "header cancel" }
                 cancelPointer()
                 return@fPointer
