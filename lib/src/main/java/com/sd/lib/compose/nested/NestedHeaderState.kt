@@ -67,16 +67,18 @@ internal class NestedHeaderState(
         }
     }
 
-    fun dispatchHide(value: Float): Boolean {
+    fun canDispatchHide(value: Float): Boolean {
         if (!isReady) return false
-        if (value < 0) {
-            if (offset > _minOffset) {
+        return value < 0 && offset > _minOffset
+    }
+
+    fun dispatchHide(value: Float): Boolean {
+        return canDispatchHide(value).also { can ->
+            if (can) {
                 val newOffset = offset + value
                 offset = newOffset.coerceAtLeast(_minOffset)
-                return true
             }
         }
-        return false
     }
 
     fun dispatchShow(value: Float): Boolean {
