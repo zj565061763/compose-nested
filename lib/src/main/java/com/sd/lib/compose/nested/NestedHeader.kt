@@ -155,19 +155,19 @@ private fun Modifier.headerGesture(
     debug: Boolean,
 ): Modifier = composed {
 
-    var isDrag by remember { mutableStateOf(false) }
+    var hasDrag by remember { mutableStateOf(false) }
 
     fPointer(
         pass = PointerEventPass.Initial,
         onStart = {
-            isDrag = false
+            hasDrag = false
         },
         onDown = {
             val cancelFling = state.cancelFling()
             val cancelContentFling = state.cancelContentFling()
             if (cancelFling || cancelContentFling) {
                 it.consume()
-                isDrag = true
+                hasDrag = true
                 logMsg(debug) { "header drag" }
             }
             cancelPointer()
@@ -175,11 +175,11 @@ private fun Modifier.headerGesture(
     ).fPointer(
         touchSlop = 0f,
         onStart = {
-            logMsg(debug) { "header start isDrag:${isDrag}" }
+            logMsg(debug) { "header start hasDrag:${hasDrag}" }
             calculatePan = true
         },
         onCalculate = {
-            if (!isDrag) {
+            if (!hasDrag) {
                 val positionChanged = currentEvent.changes.any { it.positionChanged() }
                 if (!positionChanged) {
                     logMsg(debug) { "header cancel consumed" }
@@ -191,7 +191,7 @@ private fun Modifier.headerGesture(
                     cancelPointer()
                     return@fPointer
                 }
-                isDrag = true
+                hasDrag = true
                 logMsg(debug) { "header drag" }
             }
 
@@ -210,13 +210,13 @@ private fun Modifier.headerGesture(
             }
         },
         onMove = {
-            if (isDrag) {
+            if (hasDrag) {
                 velocityAdd(it)
             }
         },
         onUp = {
             if (pointerCount == 1) {
-                if (isDrag) {
+                if (hasDrag) {
                     val velocity = velocityGet(it.id)?.y ?: 0f
                     state.dispatchFling(velocity)
                 }
