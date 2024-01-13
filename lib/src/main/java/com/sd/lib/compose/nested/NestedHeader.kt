@@ -179,26 +179,23 @@ private fun Modifier.headerGesture(
             calculatePan = true
         },
         onCalculate = {
-            if (!hasDrag) {
-                val positionChanged = currentEvent.changes.any { it.positionChanged() }
-                if (!positionChanged) {
-                    logMsg(debug) { "header cancel consumed" }
-                    cancelPointer()
-                    return@fPointer
-                }
-                if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
-                    logMsg(debug) { "header cancel x >= y" }
-                    cancelPointer()
-                    return@fPointer
-                }
+            if (!currentEvent.changes.any { it.positionChanged() }) {
+                logMsg(debug) { "header cancel" }
+                cancelPointer()
+                return@fPointer
             }
 
-            val panY = this.pan.y
-
             if (!hasDrag) {
+                if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                    return@fPointer
+                }
+
+                val panY = this.pan.y
                 if (state.canDispatchHide(panY) || state.canDispatchShow(panY)) {
                     hasDrag = true
                     logMsg(debug) { "header drag" }
+                } else {
+                    return@fPointer
                 }
             }
 
@@ -207,7 +204,7 @@ private fun Modifier.headerGesture(
             }
 
             state.headerNestedScrollDispatcher.dispatchScroll(
-                available = Offset(0f, panY),
+                available = Offset(0f, this.pan.y),
                 source = NestedScrollSource.Drag,
             ) { left ->
                 val leftValue = left.y
@@ -223,10 +220,10 @@ private fun Modifier.headerGesture(
                 velocityAdd(it)
             }
         },
-        onUp = {
-            if (pointerCount == 1) {
+        onUp = { input ->
+            if (pointerCount == 1 && !input.isConsumed) {
                 if (hasDrag) {
-                    val velocity = velocityGet(it.id)?.y ?: 0f
+                    val velocity = velocityGet(input.id)?.y ?: 0f
                     state.dispatchFling(velocity)
                 }
             }
