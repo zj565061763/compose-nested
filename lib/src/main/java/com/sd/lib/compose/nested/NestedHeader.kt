@@ -215,7 +215,11 @@ private fun Modifier.headerGesture(
             }
         },
         onUp = { input ->
-            if (pointerCount == 1 && !input.isConsumed) {
+            if (pointerCount == 1) {
+                if (input.isConsumed) {
+                    cancelPointer()
+                    return@fPointer
+                }
                 if (hasDrag) {
                     val velocity = velocityGet(input.id)?.y ?: 0f
                     state.dispatchFling(velocity)
