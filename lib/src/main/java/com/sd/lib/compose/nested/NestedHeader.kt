@@ -193,8 +193,21 @@ private fun Modifier.headerGesture(
                 }
             }
 
+            val panY = this.pan.y
+
+            if (state.canDispatchHide(panY)) {
+                if (!hasDrag) {
+                    hasDrag = true
+                    logMsg(debug) { "header drag" }
+                }
+            }
+
+            if (hasDrag) {
+                currentEvent.fConsume { it.positionChanged() }
+            }
+
             state.headerNestedScrollDispatcher.dispatchScroll(
-                available = Offset(0f, this.pan.y),
+                available = Offset(0f, panY),
                 source = NestedScrollSource.Drag,
             ) { left ->
                 val leftValue = left.y
@@ -202,18 +215,7 @@ private fun Modifier.headerGesture(
                     leftValue < 0 -> state.dispatchHide(leftValue)
                     leftValue > 0 -> state.dispatchShow(leftValue)
                     else -> false
-                }.also { dispatch ->
-                    if (dispatch) {
-                        if (!hasDrag) {
-                            hasDrag = true
-                            logMsg(debug) { "header drag" }
-                        }
-                    }
                 }
-            }
-
-            if (hasDrag) {
-                currentEvent.fConsume { it.positionChanged() }
             }
         },
         onMove = {
