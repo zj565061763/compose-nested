@@ -1,8 +1,7 @@
 package com.sd.lib.compose.nested
 
-import androidx.compose.animation.SplineBasedFloatDecayAnimationSpec
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.generateDecayAnimationSpec
+import androidx.compose.animation.splineBasedDecay
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -112,7 +111,7 @@ internal class NestedHeaderState(
                 var lastValue = _animFling.value
                 _animFling.animateDecay(
                     initialVelocity = left.y,
-                    animationSpec = SplineBasedFloatDecayAnimationSpec(density).generateDecayAnimationSpec(),
+                    animationSpec = splineBasedDecay(density),
                 ) {
                     val delta = value - lastValue
                     lastValue = value
