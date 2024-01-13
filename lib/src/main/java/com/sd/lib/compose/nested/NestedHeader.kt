@@ -187,7 +187,10 @@ private fun Modifier.headerGesture(
             }
 
             if (!hasDrag) {
-                if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
+                val panX = this.pan.x.absoluteValue
+                val panY = this.pan.y.absoluteValue
+                if (panX >= panY) {
+                    cancelPointer()
                     return@fPointer
                 }
                 hasDrag = true
