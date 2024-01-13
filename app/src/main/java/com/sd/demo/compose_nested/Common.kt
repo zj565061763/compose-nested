@@ -70,12 +70,12 @@ fun HorizontalListView(
 
 val nestedScrollConnection = object : NestedScrollConnection {
     override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        logMsg { "1 (${available.y}) $source" }
+        logMsg { "pre (${available.y}) $source" }
         return super.onPreScroll(available, source)
     }
 
     override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-        logMsg { "2 (${available.y}) (${consumed.y}) $source" }
+        logMsg { "post (${available.y}) (${consumed.y}) $source" }
         return super.onPostScroll(consumed, available, source)
     }
 
