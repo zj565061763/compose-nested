@@ -195,8 +195,8 @@ private fun Modifier.headerGesture(
 
             val panY = this.pan.y
 
-            if (state.canDispatchHide(panY) || state.canDispatchShow(panY)) {
-                if (!hasDrag) {
+            if (!hasDrag) {
+                if (state.canDispatchHide(panY) || state.canDispatchShow(panY)) {
                     hasDrag = true
                     logMsg(debug) { "header drag" }
                 }
