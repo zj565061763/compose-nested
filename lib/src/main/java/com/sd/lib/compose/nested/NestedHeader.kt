@@ -189,14 +189,8 @@ private fun Modifier.headerGesture(
                 if (this.pan.x.absoluteValue >= this.pan.y.absoluteValue) {
                     return@fPointer
                 }
-
-                val panY = this.pan.y
-                if (state.canDispatchHide(panY) || state.canDispatchShow(panY)) {
-                    hasDrag = true
-                    logMsg(debug) { "header drag" }
-                } else {
-                    return@fPointer
-                }
+                hasDrag = true
+                logMsg(debug) { "header drag" }
             }
 
             if (hasDrag) {
