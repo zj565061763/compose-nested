@@ -77,18 +77,14 @@ internal class NestedHeaderState(
         return false
     }
 
-    fun canDispatchShow(value: Float): Boolean {
-        if (!isReady) return false
-        return value > 0 && offset < _maxOffset
-    }
-
     fun dispatchShow(value: Float): Boolean {
-        return canDispatchShow(value).also { can ->
-            if (can) {
-                val newOffset = offset + value
-                offset = newOffset.coerceAtMost(_maxOffset)
-            }
+        if (!isReady) return false
+        if (value > 0 && offset < _maxOffset) {
+            val newOffset = offset + value
+            offset = newOffset.coerceAtMost(_maxOffset)
+            return true
         }
+        return false
     }
 
     fun dispatchFling(velocity: Float) {
