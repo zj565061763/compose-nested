@@ -89,49 +89,53 @@ internal class NestedHeaderState(
 
     fun dispatchFling(velocity: Float) {
         if (!isReady) return
-        @Suppress("NAME_SHADOWING")
-        val velocity = velocity.takeIf { it.absoluteValue > 200 } ?: 0f
         coroutineScope.launch {
-            val uuid = if (debug) UUID.randomUUID().toString() else ""
-            logMsg(debug) { "fling start velocity:${velocity} $uuid" }
-
-            val available = Velocity(0f, velocity)
-            val preConsumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
-
-            val left = available - preConsumed
-            logMsg(debug) { "fling preConsumed:${preConsumed.y} left:${left.y} $uuid" }
-
-            if (left != Velocity.Zero) {
-                _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
-                _animFling.snapTo(offset)
-
-                var lastValue = _animFling.value
-                _animFling.animateDecay(
-                    initialVelocity = left.y,
-                    animationSpec = splineBasedDecay(density),
-                ) {
-                    val delta = value - lastValue
-                    lastValue = value
-
-                    headerNestedScrollDispatcher.dispatchScroll(
-                        available = Offset(0f, delta),
-                        source = NestedScrollSource.Fling,
-                    ) { left ->
-                        val leftValue = left.y
-                        when {
-                            leftValue < 0 -> dispatchHide(leftValue)
-                            leftValue > 0 -> dispatchShow(leftValue)
-                            else -> false
-                        }
-                    }
-                }
-            }
-
-            val postConsumed = headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
-            logMsg(debug) { "fling end postConsumed:${postConsumed.y} $uuid" }
+            dispatchFlingInternal(
+                velocity = velocity.takeIf { it.absoluteValue > 300 } ?: 0f
+            )
         }.also {
             _flingJob = it
         }
+    }
+
+    private suspend fun dispatchFlingInternal(velocity: Float) {
+        val uuid = if (debug) UUID.randomUUID().toString() else ""
+        logMsg(debug) { "fling start velocity:${velocity} $uuid" }
+
+        val available = Velocity(0f, velocity)
+        val preConsumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
+
+        val left = available - preConsumed
+        logMsg(debug) { "fling preConsumed:${preConsumed.y} left:${left.y} $uuid" }
+
+        if (left != Velocity.Zero) {
+            _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
+            _animFling.snapTo(offset)
+
+            var lastValue = _animFling.value
+            _animFling.animateDecay(
+                initialVelocity = left.y,
+                animationSpec = splineBasedDecay(density),
+            ) {
+                val delta = value - lastValue
+                lastValue = value
+
+                headerNestedScrollDispatcher.dispatchScroll(
+                    available = Offset(0f, delta),
+                    source = NestedScrollSource.Fling,
+                ) { left ->
+                    val leftValue = left.y
+                    when {
+                        leftValue < 0 -> dispatchHide(leftValue)
+                        leftValue > 0 -> dispatchShow(leftValue)
+                        else -> false
+                    }
+                }
+            }
+        }
+
+        val postConsumed = headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
+        logMsg(debug) { "fling end postConsumed:${postConsumed.y} $uuid" }
     }
 
     fun cancelFling(): Boolean {
