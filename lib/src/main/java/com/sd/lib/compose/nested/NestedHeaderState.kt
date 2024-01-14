@@ -97,7 +97,8 @@ internal class NestedHeaderState(
 
     fun dispatchFling(velocity: Float) {
         if (!isReady) return
-        if (velocity.absoluteValue < 100) return
+        @Suppress("NAME_SHADOWING")
+        val velocity = velocity.takeIf { it.absoluteValue > 200 } ?: 0f
         coroutineScope.launch {
             val uuid = if (debug) UUID.randomUUID().toString() else ""
             logMsg(debug) { "fling start velocity:${velocity} $uuid" }
