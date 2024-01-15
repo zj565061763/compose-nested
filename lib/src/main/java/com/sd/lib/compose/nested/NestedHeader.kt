@@ -162,13 +162,14 @@ private fun Modifier.headerGesture(
 ): Modifier = this.composed {
 
     var hasDrag by remember { mutableStateOf(false) }
+    val velocityTracker = remember { VelocityTracker() }
 
     pointerInput(state) {
         awaitEachGesture {
             val down = awaitFirstDown(requireUnconsumed = false)
 
             logMsg(debug) { "header start hasDrag:${hasDrag}" }
-            val velocityTracker = VelocityTracker()
+            velocityTracker.resetTracking()
 
             // finishOrCancel，true表示正常结束，false表示取消
             val finishOrCancel = drag(down.id) { input ->
@@ -208,22 +209,25 @@ private fun Modifier.headerGesture(
             }
             logMsg(debug) { "header finish" }
         }
-    }.fPointer(
-        pass = PointerEventPass.Initial,
-        onStart = {
-            hasDrag = false
-        },
-        onDown = {
-            val cancelFling = state.cancelFling()
-            val cancelContentFling = state.cancelContentFling()
-            if (cancelFling || cancelContentFling) {
-                it.consume()
-                hasDrag = true
-                logMsg(debug) { "header drag" }
+    }
+        .pointerInput(state) {
+            awaitEachGesture {
+                val down = awaitFirstDown(
+                    requireUnconsumed = false,
+                    pass = PointerEventPass.Initial,
+                )
+
+                logMsg(debug) { "header reset" }
+                hasDrag = false
+
+                val cancelFling = state.cancelFling()
+                val cancelContentFling = state.cancelContentFling()
+                if (cancelFling || cancelContentFling) {
+                    down.consume()
+                    hasDrag = true
+                }
             }
-            cancelPointer()
-        },
-    )
+        }
 }
 
 internal inline fun logMsg(
