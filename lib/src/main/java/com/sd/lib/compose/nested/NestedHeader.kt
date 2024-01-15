@@ -184,14 +184,14 @@ private fun Modifier.headerGesture(
                     logMsg(debug) { "header drag" }
                 }
 
-                check(hasDrag)
-                input.consume()
-                velocityTracker.addPointerInputChange(input)
-
-                state.dispatchNestedScroll(
-                    available = pan.y,
-                    source = NestedScrollSource.Drag,
-                )
+                if (hasDrag) {
+                    input.consume()
+                    velocityTracker.addPointerInputChange(input)
+                    state.dispatchNestedScroll(
+                        available = pan.y,
+                        source = NestedScrollSource.Drag,
+                    )
+                }
             }
 
             if (hasDrag) {
