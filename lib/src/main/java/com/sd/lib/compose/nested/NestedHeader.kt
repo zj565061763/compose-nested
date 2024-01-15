@@ -1,6 +1,9 @@
 package com.sd.lib.compose.nested
 
 import android.util.Log
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.drag
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -15,15 +18,17 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
-import androidx.compose.ui.input.pointer.positionChanged
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.positionChange
+import androidx.compose.ui.input.pointer.util.VelocityTracker
+import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
-import com.sd.lib.compose.gesture.fConsume
-import com.sd.lib.compose.gesture.fHasConsumedPositionChange
 import com.sd.lib.compose.gesture.fPointer
+import kotlinx.coroutines.CancellationException
 import kotlin.math.absoluteValue
 
 @Composable
@@ -154,11 +159,56 @@ private fun ContentBox(
 private fun Modifier.headerGesture(
     state: NestedHeaderState,
     debug: Boolean,
-): Modifier = composed {
+): Modifier = this.composed {
 
     var hasDrag by remember { mutableStateOf(false) }
 
-    fPointer(
+    pointerInput(state) {
+        awaitEachGesture {
+            val down = awaitFirstDown(requireUnconsumed = false)
+
+            logMsg(debug) { "header start hasDrag:${hasDrag}" }
+            val velocityTracker = VelocityTracker()
+
+            // finishOrCancel，true表示正常结束，false表示取消
+            val finishOrCancel = drag(down.id) { input ->
+                val pan = input.positionChange()
+
+                if (!hasDrag) {
+                    if (pan.x.absoluteValue > pan.y.absoluteValue) {
+                        logMsg(debug) { "header cancel x > y" }
+                        throw CancellationException()
+                    }
+                    hasDrag = true
+                    logMsg(debug) { "header drag" }
+                }
+
+                check(hasDrag)
+                input.consume()
+                velocityTracker.addPointerInputChange(input)
+
+                state.headerNestedScrollDispatcher.dispatchScroll(
+                    available = Offset(0f, pan.y),
+                    source = NestedScrollSource.Drag,
+                ) { left ->
+                    val leftValue = left.y
+                    when {
+                        leftValue < 0 -> state.dispatchHide(leftValue)
+                        leftValue > 0 -> state.dispatchShow(leftValue)
+                        else -> false
+                    }
+                }
+            }
+
+            if (hasDrag) {
+                if (finishOrCancel) {
+                    val velocity = velocityTracker.calculateVelocity().y
+                    state.dispatchFling(velocity)
+                }
+            }
+            logMsg(debug) { "header finish" }
+        }
+    }.fPointer(
         pass = PointerEventPass.Initial,
         onStart = {
             hasDrag = false
@@ -173,64 +223,6 @@ private fun Modifier.headerGesture(
             }
             cancelPointer()
         },
-    ).fPointer(
-        touchSlop = 0f,
-        onStart = {
-            logMsg(debug) { "header start hasDrag:${hasDrag}" }
-            calculatePan = true
-        },
-        onCalculate = {
-            if (currentEvent.fHasConsumedPositionChange()) {
-                logMsg(debug) { "header cancel" }
-                cancelPointer()
-                return@fPointer
-            }
-
-            if (!hasDrag) {
-                if (this.pan.x.absoluteValue > this.pan.y.absoluteValue) {
-                    cancelPointer()
-                    return@fPointer
-                }
-                hasDrag = true
-                logMsg(debug) { "header drag" }
-            }
-
-            if (hasDrag) {
-                currentEvent.fConsume { it.positionChanged() }
-            }
-
-            state.headerNestedScrollDispatcher.dispatchScroll(
-                available = Offset(0f, this.pan.y),
-                source = NestedScrollSource.Drag,
-            ) { left ->
-                val leftValue = left.y
-                when {
-                    leftValue < 0 -> state.dispatchHide(leftValue)
-                    leftValue > 0 -> state.dispatchShow(leftValue)
-                    else -> false
-                }
-            }
-        },
-        onMove = {
-            if (hasDrag) {
-                velocityAdd(it)
-            }
-        },
-        onUp = { input ->
-            if (pointerCount == 1) {
-                if (input.isConsumed) {
-                    cancelPointer()
-                    return@fPointer
-                }
-                if (hasDrag) {
-                    val velocity = velocityGet(input.id)?.y ?: 0f
-                    state.dispatchFling(velocity)
-                }
-            }
-        },
-        onFinish = {
-            logMsg(debug) { "header finish" }
-        }
     )
 }
 
