@@ -203,7 +203,7 @@ private class NestedScrollConnectionY(
     }
 }
 
-private fun NestedScrollDispatcher.dispatchScroll(
+private inline fun NestedScrollDispatcher.dispatchScroll(
     available: Offset,
     source: NestedScrollSource,
     onScroll: (Offset) -> Boolean,
