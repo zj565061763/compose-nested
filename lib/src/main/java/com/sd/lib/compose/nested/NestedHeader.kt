@@ -13,7 +13,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -189,17 +188,10 @@ private fun Modifier.headerGesture(
                 input.consume()
                 velocityTracker.addPointerInputChange(input)
 
-                state.headerNestedScrollDispatcher.dispatchScroll(
-                    available = Offset(0f, pan.y),
+                state.dispatchNestedScroll(
+                    available = pan.y,
                     source = NestedScrollSource.Drag,
-                ) { left ->
-                    val leftValue = left.y
-                    when {
-                        leftValue < 0 -> state.dispatchHide(leftValue)
-                        leftValue > 0 -> state.dispatchShow(leftValue)
-                        else -> false
-                    }
-                }
+                )
             }
 
             if (hasDrag) {

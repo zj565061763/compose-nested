@@ -119,23 +119,32 @@ internal class NestedHeaderState(
             ) {
                 val delta = value - lastValue
                 lastValue = value
-
-                headerNestedScrollDispatcher.dispatchScroll(
-                    available = Offset(0f, delta),
+                dispatchNestedScroll(
+                    available = delta,
                     source = NestedScrollSource.Fling,
-                ) { left ->
-                    val leftValue = left.y
-                    when {
-                        leftValue < 0 -> dispatchHide(leftValue)
-                        leftValue > 0 -> dispatchShow(leftValue)
-                        else -> false
-                    }
-                }
+                )
             }
         }
 
         val postConsumed = headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
         logMsg(debug) { "fling end postConsumed:${postConsumed.y} $uuid" }
+    }
+
+    fun dispatchNestedScroll(
+        available: Float,
+        source: NestedScrollSource,
+    ) {
+        headerNestedScrollDispatcher.dispatchScroll(
+            available = Offset(0f, available),
+            source = source,
+        ) { left ->
+            val leftValue = left.y
+            when {
+                leftValue < 0 -> dispatchHide(leftValue)
+                leftValue > 0 -> dispatchShow(leftValue)
+                else -> false
+            }
+        }
     }
 
     fun cancelFling(): Boolean {
@@ -194,7 +203,7 @@ private class NestedScrollConnectionY(
     }
 }
 
-internal fun NestedScrollDispatcher.dispatchScroll(
+private fun NestedScrollDispatcher.dispatchScroll(
     available: Offset,
     source: NestedScrollSource,
     onScroll: (Offset) -> Boolean,
