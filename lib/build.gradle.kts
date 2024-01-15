@@ -39,7 +39,6 @@ kotlin {
 
 dependencies {
     implementation(libs.androidx.compose.foundation)
-    implementation(libs.sd.composeGesture)
 }
 
 publishing {

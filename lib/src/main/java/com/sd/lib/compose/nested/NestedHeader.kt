@@ -27,7 +27,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
-import com.sd.lib.compose.gesture.fPointer
 import kotlinx.coroutines.CancellationException
 import kotlin.math.absoluteValue
 
@@ -138,15 +137,17 @@ private fun ContentBox(
             .nestedScroll(state.contentNestedScrollConnection)
             .let { m ->
                 if (state.isReady) {
-                    m.fPointer(
-                        pass = PointerEventPass.Initial,
-                        onDown = { input ->
+                    m.pointerInput(state) {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(
+                                requireUnconsumed = false,
+                                pass = PointerEventPass.Initial,
+                            )
                             if (state.cancelFling()) {
-                                input.consume()
+                                down.consume()
                             }
-                            cancelPointer()
-                        },
-                    )
+                        }
+                    }
                 } else {
                     m
                 }
