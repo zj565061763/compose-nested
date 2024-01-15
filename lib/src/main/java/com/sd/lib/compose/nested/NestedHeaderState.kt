@@ -67,7 +67,7 @@ internal class NestedHeaderState(
         }
     }
 
-    fun dispatchHide(value: Float): Boolean {
+    private fun dispatchHide(value: Float): Boolean {
         if (!isReady) return false
         if (value < 0 && offset > _minOffset) {
             val newOffset = offset + value
@@ -77,7 +77,7 @@ internal class NestedHeaderState(
         return false
     }
 
-    fun dispatchShow(value: Float): Boolean {
+    private fun dispatchShow(value: Float): Boolean {
         if (!isReady) return false
         if (value > 0 && offset < _maxOffset) {
             val newOffset = offset + value
