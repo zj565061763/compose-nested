@@ -26,13 +26,12 @@ internal class NestedHeaderState(
    private val coroutineScope: CoroutineScope,
 ) {
    var debug: Boolean = false
+   lateinit var density: Density
 
    var isReady by mutableStateOf(false)
       private set
 
    var offset by mutableFloatStateOf(0f)
-
-   lateinit var density: Density
 
    private var _minOffset: Float = 0f
    private val _maxOffset: Float = 0f
