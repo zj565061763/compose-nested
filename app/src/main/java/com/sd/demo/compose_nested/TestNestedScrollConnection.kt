@@ -10,23 +10,23 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import com.sd.demo.compose_nested.ui.theme.AppTheme
 
 class TestNestedScrollConnection : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                Content()
-            }
-        }
-    }
+   override fun onCreate(savedInstanceState: Bundle?) {
+      super.onCreate(savedInstanceState)
+      setContent {
+         AppTheme {
+            Content()
+         }
+      }
+   }
 }
 
 @Composable
 private fun Content(
-    modifier: Modifier = Modifier,
+   modifier: Modifier = Modifier,
 ) {
-    Box(
-        modifier = modifier.nestedScroll(nestedScrollConnection)
-    ) {
-        VerticalListView(count = 50)
-    }
+   Box(
+      modifier = modifier.nestedScroll(nestedScrollConnection)
+   ) {
+      VerticalListView(count = 50)
+   }
 }

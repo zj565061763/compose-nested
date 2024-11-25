@@ -24,83 +24,83 @@ import com.sd.demo.compose_nested.ui.theme.AppTheme
 import com.sd.lib.compose.nested.FNestedHeader
 
 class SampleNestedHeader : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                Content()
-            }
-        }
-    }
+   override fun onCreate(savedInstanceState: Bundle?) {
+      super.onCreate(savedInstanceState)
+      setContent {
+         AppTheme {
+            Content()
+         }
+      }
+   }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content(
-    modifier: Modifier = Modifier,
+   modifier: Modifier = Modifier,
 ) {
-    val pagerState = rememberPagerState { 10 }
+   val pagerState = rememberPagerState { 10 }
 
-    HorizontalPager(
-        state = pagerState
-    ) { index ->
-        if (index == 0) {
-            FNestedHeader(
-                modifier = modifier
-                    .fillMaxSize()
-                    .nestedScroll(nestedScrollConnection),
-                debug = true,
-                header = {
-                    HeaderView()
-                }
-            ) {
-                VerticalListView(count = 50)
+   HorizontalPager(
+      state = pagerState
+   ) { index ->
+      if (index == 0) {
+         FNestedHeader(
+            modifier = modifier
+                .fillMaxSize()
+                .nestedScroll(nestedScrollConnection),
+            debug = true,
+            header = {
+               HeaderView()
             }
-        } else {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = index.toString())
-            }
-        }
-    }
+         ) {
+            VerticalListView(count = 50)
+         }
+      } else {
+         Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
+         ) {
+            Text(text = index.toString())
+         }
+      }
+   }
 }
 
 @Composable
 private fun HeaderView(
-    modifier: Modifier = Modifier,
+   modifier: Modifier = Modifier,
 ) {
-    Column(
-        modifier = modifier.fillMaxWidth()
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .background(Color.Red)
-                .clickable {
-                    logMsg { "click Red" }
-                }
-        )
+   Column(
+      modifier = modifier.fillMaxWidth()
+   ) {
+      Box(
+         modifier = Modifier
+             .fillMaxWidth()
+             .height(300.dp)
+             .background(Color.Red)
+             .clickable {
+                 logMsg { "click Red" }
+             }
+      )
 
-        HorizontalListView()
+      HorizontalListView()
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp)
-                .background(Color.Green)
-        )
+      Box(
+         modifier = Modifier
+             .fillMaxWidth()
+             .height(500.dp)
+             .background(Color.Green)
+      )
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(500.dp)
-                .background(Color.Blue)
-                .clickable {
-                    logMsg { "click Blue" }
-                }
-        )
-    }
+      Box(
+         modifier = Modifier
+             .fillMaxWidth()
+             .height(500.dp)
+             .background(Color.Blue)
+             .clickable {
+                 logMsg { "click Blue" }
+             }
+      )
+   }
 }

@@ -21,71 +21,71 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun VerticalListView(
-    modifier: Modifier = Modifier,
-    count: Int,
+   modifier: Modifier = Modifier,
+   count: Int,
 ) {
-    val context = LocalContext.current
-    LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color.Gray),
-    ) {
-        items(count) { index ->
-            Button(
-                onClick = {
-                    Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(text = index.toString())
-            }
-        }
-    }
+   val context = LocalContext.current
+   LazyColumn(
+      modifier = modifier
+         .fillMaxWidth()
+         .background(Color.Gray),
+   ) {
+      items(count) { index ->
+         Button(
+            onClick = {
+               Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.fillMaxWidth(),
+         ) {
+            Text(text = index.toString())
+         }
+      }
+   }
 }
 
 @Composable
 fun HorizontalListView(
-    modifier: Modifier = Modifier,
-    count: Int = 50,
-    height: Dp = 200.dp,
+   modifier: Modifier = Modifier,
+   count: Int = 50,
+   height: Dp = 200.dp,
 ) {
-    val context = LocalContext.current
-    LazyRow(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(Color.Gray),
-    ) {
-        items(count) { index ->
-            Button(
-                onClick = {
-                    Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
-                },
-                modifier = Modifier.height(height)
-            ) {
-                Text(text = index.toString())
-            }
-        }
-    }
+   val context = LocalContext.current
+   LazyRow(
+      modifier = modifier
+         .fillMaxWidth()
+         .background(Color.Gray),
+   ) {
+      items(count) { index ->
+         Button(
+            onClick = {
+               Toast.makeText(context, index.toString(), Toast.LENGTH_SHORT).show()
+            },
+            modifier = Modifier.height(height)
+         ) {
+            Text(text = index.toString())
+         }
+      }
+   }
 }
 
 val nestedScrollConnection = object : NestedScrollConnection {
-    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-        logMsg { "pre (${available.y}) $source" }
-        return super.onPreScroll(available, source)
-    }
+   override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+      logMsg { "pre (${available.y}) $source" }
+      return super.onPreScroll(available, source)
+   }
 
-    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-        logMsg { "post (${available.y}) (${consumed.y}) $source" }
-        return super.onPostScroll(consumed, available, source)
-    }
+   override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+      logMsg { "post (${available.y}) (${consumed.y}) $source" }
+      return super.onPostScroll(consumed, available, source)
+   }
 
-    override suspend fun onPreFling(available: Velocity): Velocity {
-        logMsg { "--1 (${available.y})" }
-        return super.onPreFling(available)
-    }
+   override suspend fun onPreFling(available: Velocity): Velocity {
+      logMsg { "--1 (${available.y})" }
+      return super.onPreFling(available)
+   }
 
-    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-        logMsg { "--2 (${available.y}) (${consumed.y})" }
-        return super.onPostFling(consumed, available)
-    }
+   override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+      logMsg { "--2 (${available.y}) (${consumed.y})" }
+      return super.onPostFling(consumed, available)
+   }
 }

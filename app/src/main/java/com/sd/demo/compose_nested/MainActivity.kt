@@ -23,51 +23,51 @@ import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_nested.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContent {
-            AppTheme {
-                Content(
-                    listActivity = listOf(
-                        SampleNestedHeader::class.java,
-                        TestNestedScrollConnection::class.java,
-                    ),
-                    onClickActivity = {
-                        startActivity(Intent(this, it))
-                    },
-                )
-            }
-        }
-    }
+   override fun onCreate(savedInstanceState: Bundle?) {
+      super.onCreate(savedInstanceState)
+      setContent {
+         AppTheme {
+            Content(
+               listActivity = listOf(
+                  SampleNestedHeader::class.java,
+                  TestNestedScrollConnection::class.java,
+               ),
+               onClickActivity = {
+                  startActivity(Intent(this, it))
+               },
+            )
+         }
+      }
+   }
 }
 
 @Composable
 private fun Content(
-    listActivity: List<Class<out Activity>>,
-    onClickActivity: (Class<out Activity>) -> Unit,
+   listActivity: List<Class<out Activity>>,
+   onClickActivity: (Class<out Activity>) -> Unit,
 ) {
-    val onClickActivityUpdated by rememberUpdatedState(onClickActivity)
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .statusBarsPadding(),
-        verticalArrangement = Arrangement.spacedBy(5.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        items(
-            listActivity,
-            key = { it },
-        ) { item ->
-            Button(
-                onClick = { onClickActivityUpdated(item) },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(text = item.simpleName)
-            }
-        }
-    }
+   val onClickActivityUpdated by rememberUpdatedState(onClickActivity)
+   LazyColumn(
+      modifier = Modifier
+         .fillMaxSize()
+         .statusBarsPadding(),
+      verticalArrangement = Arrangement.spacedBy(5.dp),
+      horizontalAlignment = Alignment.CenterHorizontally,
+   ) {
+      items(
+         listActivity,
+         key = { it },
+      ) { item ->
+         Button(
+            onClick = { onClickActivityUpdated(item) },
+            modifier = Modifier.fillMaxWidth(),
+         ) {
+            Text(text = item.simpleName)
+         }
+      }
+   }
 }
 
 inline fun logMsg(block: () -> Any?) {
-    Log.i("compose-nested-demo", block().toString())
+   Log.i("compose-nested-demo", block().toString())
 }
