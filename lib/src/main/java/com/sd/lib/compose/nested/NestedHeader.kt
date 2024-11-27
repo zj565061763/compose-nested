@@ -132,7 +132,7 @@ private fun HeaderBox(
 ) {
    val modifier = if (state.isReady) {
       Modifier
-         .headerGesture(state = state)
+         .headerGesture(state)
          .nestedScroll(
             connection = object : NestedScrollConnection {},
             dispatcher = state.headerNestedScrollDispatcher,
