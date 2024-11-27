@@ -43,11 +43,13 @@ private fun Content(
       modifier = modifier.fillMaxSize(),
    ) { index ->
       if (index == 0) {
-         FirstPageView()
+         FirstPageView(
+            modifier = Modifier.nestedScroll(TestNestedScrollConnection)
+         )
       } else {
          VerticalListView(
             count = 100,
-            modifier = Modifier.nestedScroll(nestedScrollConnection)
+            modifier = Modifier.nestedScroll(TestNestedScrollConnection)
          )
       }
    }
