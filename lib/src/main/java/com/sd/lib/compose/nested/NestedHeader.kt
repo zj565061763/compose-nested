@@ -34,7 +34,12 @@ fun NestedHeader(
    header: @Composable () -> Unit,
    content: @Composable () -> Unit,
 ) {
+   @Suppress("NAME_SHADOWING")
    SubcomposeLayout(modifier = modifier) { cs ->
+      val hasFixedWidth = cs.hasFixedWidth
+      val hasFixedHeight = cs.hasFixedHeight
+      val cs = cs.copy(minWidth = 0, minHeight = 0)
+
       val headerPlaceable = (subcompose(SlotId.Header) {
          HeaderBox(
             state = state,
@@ -55,13 +60,13 @@ fun NestedHeader(
          it.first().measure(cs)
       }
 
-      val width = if (cs.hasFixedWidth) {
+      val width = if (hasFixedWidth) {
          cs.maxWidth
       } else {
          cs.constrainWidth(maxOf(headerPlaceable.width, contentPlaceable.width))
       }
 
-      val height = if (cs.hasFixedHeight) {
+      val height = if (hasFixedHeight) {
          cs.maxHeight
       } else {
          cs.constrainHeight(headerPlaceable.height + contentPlaceable.height)
