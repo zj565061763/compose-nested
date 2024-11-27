@@ -16,11 +16,8 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
-import kotlinx.coroutines.isActive
 import java.util.UUID
-import kotlin.coroutines.CoroutineContext
 import kotlin.math.absoluteValue
 
 @Composable
@@ -48,12 +45,12 @@ class NestedHeaderState internal constructor(
 
    private val _animFling = Animatable(0f)
    private var _flingJob: Job? = null
+   private var _contentFlingJob: Job? = null
 
    internal var debug: Boolean = false
    internal lateinit var density: Density
-   internal val headerNestedScrollDispatcher = NestedScrollDispatcher()
 
-   private var _contentFlingContext: CoroutineContext? = null
+   internal val headerNestedScrollDispatcher = NestedScrollDispatcher()
    internal val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
       onPreScroll = { value, _ ->
          dispatchHide(value)
@@ -62,7 +59,7 @@ class NestedHeaderState internal constructor(
          dispatchShow(value)
       },
       onPreFling = {
-         _contentFlingContext = currentCoroutineContext()
+         _contentFlingJob = currentCoroutineContext()[Job]
          false
       }
    )
@@ -165,13 +162,13 @@ class NestedHeaderState internal constructor(
    }
 
    internal fun cancelContentFling(): Boolean {
-      val fling = _contentFlingContext ?: return false
-      return fling.isActive.also { isActive ->
+      val job = _contentFlingJob ?: return false
+      _contentFlingJob = null
+      return job.isActive.also { isActive ->
          if (isActive) {
             logMsg { "content fling cancel" }
-            fling.cancel()
+            job.cancel()
          }
-         _contentFlingContext = null
       }
    }
 }
