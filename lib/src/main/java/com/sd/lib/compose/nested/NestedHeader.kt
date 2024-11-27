@@ -151,7 +151,6 @@ private fun Modifier.headerGesture(
    var hasDrag by remember { mutableStateOf(false) }
    val velocityTracker = remember { VelocityTracker() }
    val coroutineScope = rememberCoroutineScope()
-
    pointerInput(state) {
       awaitEachGesture {
          val down = awaitFirstDown(requireUnconsumed = false)
@@ -159,8 +158,8 @@ private fun Modifier.headerGesture(
          state.logMsg { "header start hasDrag:${hasDrag}" }
          velocityTracker.resetTracking()
 
-         // finishOrCancel，true表示正常结束，false表示取消
-         val finishOrCancel = drag(down.id) { input ->
+         // finishNormally，true表示正常结束，false表示取消
+         val finishNormally = drag(down.id) { input ->
             val pan = input.positionChange()
 
             if (!hasDrag) {
@@ -182,14 +181,13 @@ private fun Modifier.headerGesture(
             }
          }
 
-         if (hasDrag) {
-            if (finishOrCancel) {
-               val velocity = velocityTracker.calculateVelocity().y
-               coroutineScope.launch {
-                  state.dispatchFling(velocity)
-               }
+         if (hasDrag && finishNormally) {
+            val velocity = velocityTracker.calculateVelocity().y
+            coroutineScope.launch {
+               state.dispatchFling(velocity)
             }
          }
+
          state.logMsg { "header finish" }
       }
    }.pointerInput(state) {
