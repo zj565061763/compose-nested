@@ -56,10 +56,10 @@ class NestedHeaderState internal constructor(
 
    internal val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
       onPreScroll = { value, _ ->
-         dispatchHide(value)
+         scrollToHide(value)
       },
       onPostScroll = { value, _ ->
-         dispatchShow(value)
+         scrollToShow(value)
       },
       onPreFling = {
          _contentFlingJob = currentCoroutineContext()[Job]
@@ -79,7 +79,7 @@ class NestedHeaderState internal constructor(
       }
    }
 
-   private fun dispatchHide(value: Float): Boolean {
+   private fun scrollToHide(value: Float): Boolean {
       if (!isReady) return false
       if (value < 0 && offset > _minOffset) {
          val newOffset = offset + value
@@ -89,7 +89,7 @@ class NestedHeaderState internal constructor(
       return false
    }
 
-   private fun dispatchShow(value: Float): Boolean {
+   private fun scrollToShow(value: Float): Boolean {
       if (!isReady) return false
       if (value > 0 && offset < _maxOffset) {
          val newOffset = offset + value
@@ -146,8 +146,8 @@ class NestedHeaderState internal constructor(
       ) { left ->
          val leftValue = left.y
          when {
-            leftValue < 0 -> dispatchHide(leftValue)
-            leftValue > 0 -> dispatchShow(leftValue)
+            leftValue < 0 -> scrollToHide(leftValue)
+            leftValue > 0 -> scrollToShow(leftValue)
             else -> false
          }
       }
