@@ -80,12 +80,12 @@ val TestNestedScrollConnection = object : NestedScrollConnection {
    }
 
    override suspend fun onPreFling(available: Velocity): Velocity {
-      logMsg { "++++++++++ (${available.y})" }
+      logMsg { "++++++++++++++++++++++++++++++++++++++++++++++++++ (${available.y})" }
       return super.onPreFling(available)
    }
 
    override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
-      logMsg { "---------- (${available.y}) (${consumed.y})" }
+      logMsg { "-------------------------------------------------- (${available.y}) (${consumed.y})" }
       return super.onPostFling(consumed, available)
    }
 }
