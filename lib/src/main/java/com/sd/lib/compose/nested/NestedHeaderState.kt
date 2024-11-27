@@ -23,7 +23,7 @@ import kotlin.math.absoluteValue
 
 @Composable
 fun rememberNestedHeaderState(
-   initialOffset: Float = 0f,
+   initialOffset: Float? = null,
    debug: Boolean = false,
 ): NestedHeaderState {
    return rememberSaveable(saver = NestedHeaderState.Saver) {
@@ -34,12 +34,12 @@ fun rememberNestedHeaderState(
 }
 
 class NestedHeaderState internal constructor(
-   initialOffset: Float = 0f,
+   private var initialOffset: Float? = null,
 ) {
    var isReady by mutableStateOf(false)
       private set
 
-   var offset by mutableFloatStateOf(initialOffset)
+   var offset by mutableFloatStateOf(0f)
 
    private val _anim = Animatable(0f)
    private var _minOffset = 0f
@@ -68,6 +68,7 @@ class NestedHeaderState internal constructor(
    internal fun setSize(header: Int, content: Int, container: Int) {
       logMsg { "setSize header:${header} content:${content} container:${container}" }
       isReady = header > 0
+
       _minOffset = if (content < container) {
          val bottom = header + content
          val delta = container - bottom
@@ -75,7 +76,11 @@ class NestedHeaderState internal constructor(
       } else {
          -header.toFloat()
       }
-      offset.coerceIn(_minOffset, _maxOffset)
+
+      initialOffset?.also {
+         initialOffset = null
+         offset = it.coerceIn(_minOffset, _maxOffset)
+      }
    }
 
    private fun scrollToHide(value: Float): Boolean {
