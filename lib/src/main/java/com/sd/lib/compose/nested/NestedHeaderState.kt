@@ -181,7 +181,7 @@ private class NestedScrollConnectionY(
    override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
       val y = available.y
       return if (onPreScroll(y, source)) {
-         available.copy(y = y)
+         Offset(x = 0f, y = y)
       } else {
          super.onPreScroll(available, source)
       }
@@ -190,7 +190,7 @@ private class NestedScrollConnectionY(
    override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
       val y = available.y
       return if (onPostScroll(y, source)) {
-         available.copy(y = y)
+         Offset(x = 0f, y = y)
       } else {
          super.onPostScroll(consumed, available, source)
       }
@@ -199,7 +199,7 @@ private class NestedScrollConnectionY(
    override suspend fun onPreFling(available: Velocity): Velocity {
       val y = available.y
       return if (onPreFling(y)) {
-         available.copy(y = y)
+         Velocity(x = 0f, y = y)
       } else {
          super.onPreFling(available)
       }
