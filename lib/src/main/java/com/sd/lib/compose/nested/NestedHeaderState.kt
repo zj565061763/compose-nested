@@ -114,26 +114,28 @@ class NestedHeaderState internal constructor(
       val left = available - preConsumed
       logMsg { "fling preConsumed:${preConsumed.y} left:${left.y} $uuid" }
 
-      if (left != Velocity.Zero) {
-         _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
-         _anim.snapTo(offset)
+      try {
+         if (left != Velocity.Zero) {
+            _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
+            _anim.snapTo(offset)
 
-         var lastValue = _anim.value
-         _anim.animateDecay(
-            initialVelocity = left.y,
-            animationSpec = splineBasedDecay(density),
-         ) {
-            val delta = value - lastValue
-            lastValue = value
-            dispatchNestedScroll(
-               available = delta,
-               source = NestedScrollSource.SideEffect,
-            )
+            var lastValue = _anim.value
+            _anim.animateDecay(
+               initialVelocity = left.y,
+               animationSpec = splineBasedDecay(density),
+            ) {
+               val delta = value - lastValue
+               lastValue = value
+               dispatchNestedScroll(
+                  available = delta,
+                  source = NestedScrollSource.SideEffect,
+               )
+            }
          }
+      } finally {
+         val postConsumed = headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
+         logMsg { "fling end postConsumed:${postConsumed.y} $uuid" }
       }
-
-      val postConsumed = headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
-      logMsg { "fling end postConsumed:${postConsumed.y} $uuid" }
    }
 
    internal fun dispatchNestedScroll(
