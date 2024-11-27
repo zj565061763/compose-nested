@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
             Content(
                listActivity = listOf(
                   Sample::class.java,
+                  SampleShortHeader::class.java,
                ),
                onClickActivity = {
                   startActivity(Intent(this, it))
