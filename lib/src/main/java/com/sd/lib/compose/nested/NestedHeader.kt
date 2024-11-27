@@ -42,10 +42,10 @@ fun FNestedHeader(
       this.density = LocalDensity.current
    }
 
+   @Suppress("NAME_SHADOWING")
    SubcomposeLayout(modifier = modifier) { cs ->
       val hasFixedWidth = cs.hasFixedWidth
       val hasFixedHeight = cs.hasFixedHeight
-      @Suppress("NAME_SHADOWING")
       val cs = cs.copy(minWidth = 0, minHeight = 0)
 
       val headerPlaceable = (subcompose(SlotId.Header) {
@@ -88,7 +88,7 @@ fun FNestedHeader(
       )
 
       logMsg(debug) {
-         "header:${headerPlaceable.height} content:${contentPlaceable.height} container:${height}"
+         "Size header:${headerPlaceable.height} content:${contentPlaceable.height} container:${height}"
       }
 
       layout(width, height) {
