@@ -77,6 +77,7 @@ class NestedHeaderState internal constructor(
       } else {
          -header.toFloat()
       }
+      offset.coerceIn(_minOffset, _maxOffset)
    }
 
    private fun scrollToHide(value: Float): Boolean {
