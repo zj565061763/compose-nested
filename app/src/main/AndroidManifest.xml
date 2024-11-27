@@ -22,8 +22,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".SampleNestedHeader" />
-        <activity android:name=".TestNestedScrollConnection" />
+        <activity android:name=".Sample" />
 
     </application>
 

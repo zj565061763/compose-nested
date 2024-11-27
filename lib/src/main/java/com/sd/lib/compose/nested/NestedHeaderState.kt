@@ -1,10 +1,13 @@
 package com.sd.lib.compose.nested
 
+import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.splineBasedDecay
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -12,26 +15,33 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollDispatcher
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Velocity
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.absoluteValue
 
-internal class NestedHeaderState(
-   private val coroutineScope: CoroutineScope,
-) {
-   var debug: Boolean = false
-   lateinit var density: Density
+@Composable
+fun rememberNestedHeaderState(
+   initialOffset: Float = 0f,
+   debug: Boolean = false,
+): NestedHeaderState {
+   return remember {
+      NestedHeaderState(initialOffset = initialOffset)
+   }.also {
+      it.debug = debug
+   }
+}
 
+class NestedHeaderState internal constructor(
+   initialOffset: Float = 0f,
+) {
    var isReady by mutableStateOf(false)
       private set
 
-   var offset by mutableFloatStateOf(0f)
+   var offset by mutableFloatStateOf(initialOffset)
 
    private var _minOffset: Float = 0f
    private val _maxOffset: Float = 0f
@@ -39,10 +49,12 @@ internal class NestedHeaderState(
    private val _animFling = Animatable(0f)
    private var _flingJob: Job? = null
 
-   val headerNestedScrollDispatcher = NestedScrollDispatcher()
+   internal var debug: Boolean = false
+   internal lateinit var density: Density
+   internal val headerNestedScrollDispatcher = NestedScrollDispatcher()
 
    private var _contentFlingContext: CoroutineContext? = null
-   val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
+   internal val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
       onPreScroll = { value, _ ->
          dispatchHide(value)
       },
@@ -55,7 +67,8 @@ internal class NestedHeaderState(
       }
    )
 
-   fun setSize(header: Int, content: Int, container: Int) {
+   internal fun setSize(header: Int, content: Int, container: Int) {
+      logMsg { "setSize header:${header} content:${content} container:${container}" }
       isReady = header > 0
       _minOffset = if (content < container) {
          val bottom = header + content
@@ -86,26 +99,20 @@ internal class NestedHeaderState(
       return false
    }
 
-   fun dispatchFling(velocity: Float) {
+   internal suspend fun dispatchFling(velocity: Float) {
       if (!isReady) return
-      coroutineScope.launch {
-         dispatchFlingInternal(
-            velocity = velocity.takeIf { it.absoluteValue > 300 } ?: 0f
-         )
-      }.also {
-         _flingJob = it
-      }
-   }
+      if (velocity.absoluteValue < 300) return
 
-   private suspend fun dispatchFlingInternal(velocity: Float) {
+      _flingJob = currentCoroutineContext()[Job]
+
       val uuid = if (debug) UUID.randomUUID().toString() else ""
-      logMsg(debug) { "fling start velocity:${velocity} $uuid" }
+      logMsg { "fling start velocity:${velocity} $uuid" }
 
       val available = Velocity(0f, velocity)
       val preConsumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
 
       val left = available - preConsumed
-      logMsg(debug) { "fling preConsumed:${preConsumed.y} left:${left.y} $uuid" }
+      logMsg { "fling preConsumed:${preConsumed.y} left:${left.y} $uuid" }
 
       if (left != Velocity.Zero) {
          _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
@@ -126,10 +133,10 @@ internal class NestedHeaderState(
       }
 
       val postConsumed = headerNestedScrollDispatcher.dispatchPostFling(left, Velocity.Zero)
-      logMsg(debug) { "fling end postConsumed:${postConsumed.y} $uuid" }
+      logMsg { "fling end postConsumed:${postConsumed.y} $uuid" }
    }
 
-   fun dispatchNestedScroll(
+   internal fun dispatchNestedScroll(
       available: Float,
       source: NestedScrollSource,
    ) {
@@ -146,22 +153,22 @@ internal class NestedHeaderState(
       }
    }
 
-   fun cancelFling(): Boolean {
+   internal fun cancelFling(): Boolean {
       val job = _flingJob ?: return false
       _flingJob = null
       return job.isActive.also { isActive ->
          if (isActive) {
-            logMsg(debug) { "fling cancel" }
+            logMsg { "fling cancel" }
             job.cancel()
          }
       }
    }
 
-   fun cancelContentFling(): Boolean {
+   internal fun cancelContentFling(): Boolean {
       val fling = _contentFlingContext ?: return false
       return fling.isActive.also { isActive ->
          if (isActive) {
-            logMsg(debug) { "content fling cancel" }
+            logMsg { "content fling cancel" }
             fling.cancel()
          }
          _contentFlingContext = null
@@ -251,5 +258,11 @@ private fun Float.consumedCoerceIn(available: Float): Float {
       available > 0f -> this.coerceIn(0f, available)
       available < 0f -> this.coerceIn(available, 0f)
       else -> 0f
+   }
+}
+
+internal inline fun NestedHeaderState.logMsg(block: () -> String) {
+   if (debug) {
+      Log.i("FNestedHeader", block())
    }
 }

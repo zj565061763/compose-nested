@@ -1,6 +1,5 @@
 package com.sd.lib.compose.nested
 
-import android.util.Log
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.drag
@@ -27,20 +26,17 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 @Composable
 fun FNestedHeader(
    modifier: Modifier = Modifier,
-   debug: Boolean = false,
+   state: NestedHeaderState = rememberNestedHeaderState(),
    header: @Composable () -> Unit,
    content: @Composable () -> Unit,
 ) {
-   val coroutineScope = rememberCoroutineScope()
-   val state = remember(coroutineScope) { NestedHeaderState(coroutineScope) }.apply {
-      this.debug = debug
-      this.density = LocalDensity.current
-   }
+   state.density = LocalDensity.current
 
    @Suppress("NAME_SHADOWING")
    SubcomposeLayout(modifier = modifier) { cs ->
@@ -51,7 +47,6 @@ fun FNestedHeader(
       val headerPlaceable = (subcompose(SlotId.Header) {
          HeaderBox(
             state = state,
-            debug = debug,
             header = header,
          )
       }).let {
@@ -86,10 +81,6 @@ fun FNestedHeader(
          content = contentPlaceable.height,
          container = height,
       )
-
-      logMsg(debug) {
-         "Size header:${headerPlaceable.height} content:${contentPlaceable.height} container:${height}"
-      }
 
       layout(width, height) {
          val offset = state.offset.toInt()
@@ -137,12 +128,11 @@ private fun ContentBox(
 @Composable
 private fun HeaderBox(
    state: NestedHeaderState,
-   debug: Boolean,
    header: @Composable () -> Unit,
 ) {
    val headerModifier = if (state.isReady) {
       Modifier
-         .headerGesture(state = state, debug = debug)
+         .headerGesture(state = state)
          .nestedScroll(
             connection = object : NestedScrollConnection {},
             dispatcher = state.headerNestedScrollDispatcher,
@@ -158,17 +148,16 @@ private fun HeaderBox(
 
 private fun Modifier.headerGesture(
    state: NestedHeaderState,
-   debug: Boolean,
 ): Modifier = this.composed {
-
    var hasDrag by remember { mutableStateOf(false) }
    val velocityTracker = remember { VelocityTracker() }
+   val coroutineScope = rememberCoroutineScope()
 
    pointerInput(state) {
       awaitEachGesture {
          val down = awaitFirstDown(requireUnconsumed = false)
 
-         logMsg(debug) { "header start hasDrag:${hasDrag}" }
+         state.logMsg { "header start hasDrag:${hasDrag}" }
          velocityTracker.resetTracking()
 
          // finishOrCancel，true表示正常结束，false表示取消
@@ -177,11 +166,11 @@ private fun Modifier.headerGesture(
 
             if (!hasDrag) {
                if (pan.x.absoluteValue > pan.y.absoluteValue) {
-                  logMsg(debug) { "header cancel x > y" }
+                  state.logMsg { "header cancel x > y" }
                   throw CancellationException()
                }
                hasDrag = true
-               logMsg(debug) { "header drag" }
+               state.logMsg { "header drag" }
             }
 
             if (hasDrag) {
@@ -189,7 +178,7 @@ private fun Modifier.headerGesture(
                velocityTracker.addPointerInputChange(input)
                state.dispatchNestedScroll(
                   available = pan.y,
-                  source = NestedScrollSource.Drag,
+                  source = NestedScrollSource.UserInput,
                )
             }
          }
@@ -197,37 +186,29 @@ private fun Modifier.headerGesture(
          if (hasDrag) {
             if (finishOrCancel) {
                val velocity = velocityTracker.calculateVelocity().y
-               state.dispatchFling(velocity)
+               coroutineScope.launch {
+                  state.dispatchFling(velocity)
+               }
             }
          }
-         logMsg(debug) { "header finish" }
+         state.logMsg { "header finish" }
       }
-   }
-      .pointerInput(state) {
-         awaitEachGesture {
-            val down = awaitFirstDown(
-               requireUnconsumed = false,
-               pass = PointerEventPass.Initial,
-            )
+   }.pointerInput(state) {
+      awaitEachGesture {
+         val down = awaitFirstDown(
+            requireUnconsumed = false,
+            pass = PointerEventPass.Initial,
+         )
 
-            logMsg(debug) { "header reset" }
-            hasDrag = false
+         state.logMsg { "header reset" }
+         hasDrag = false
 
-            val cancelFling = state.cancelFling()
-            val cancelContentFling = state.cancelContentFling()
-            if (cancelFling || cancelContentFling) {
-               down.consume()
-               hasDrag = true
-            }
+         val cancelFling = state.cancelFling()
+         val cancelContentFling = state.cancelContentFling()
+         if (cancelFling || cancelContentFling) {
+            down.consume()
+            hasDrag = true
          }
       }
-}
-
-internal inline fun logMsg(
-   debug: Boolean,
-   block: () -> String,
-) {
-   if (debug) {
-      Log.i("FNestedHeader", block())
    }
 }
