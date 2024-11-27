@@ -231,9 +231,9 @@ private inline fun NestedScrollDispatcher.dispatchScroll(
 }
 
 private fun Offset.consumedCoerceIn(available: Offset): Offset {
-   val legalX = this.x.consumedCoerceIn(available.x)
-   val legalY = this.y.consumedCoerceIn(available.y)
-   return if (this.x == legalX && this.y == legalY) {
+   val legalX = x.consumedCoerceIn(available.x)
+   val legalY = y.consumedCoerceIn(available.y)
+   return if (x == legalX && y == legalY) {
       this
    } else {
       this.copy(x = legalX, y = legalY)
@@ -241,9 +241,9 @@ private fun Offset.consumedCoerceIn(available: Offset): Offset {
 }
 
 private fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
-   val legalX = this.x.consumedCoerceIn(available.x)
-   val legalY = this.y.consumedCoerceIn(available.y)
-   return if (this.x == legalX && this.y == legalY) {
+   val legalX = x.consumedCoerceIn(available.x)
+   val legalY = y.consumedCoerceIn(available.y)
+   return if (x == legalX && y == legalY) {
       this
    } else {
       this.copy(x = legalX, y = legalY)
@@ -252,8 +252,8 @@ private fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
 
 private fun Float.consumedCoerceIn(available: Float): Float {
    return when {
-      available > 0f -> this.coerceIn(0f, available)
-      available < 0f -> this.coerceIn(available, 0f)
+      available > 0f -> coerceIn(0f, available)
+      available < 0f -> coerceIn(available, 0f)
       else -> 0f
    }
 }
