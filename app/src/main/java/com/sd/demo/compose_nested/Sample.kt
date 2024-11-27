@@ -59,7 +59,10 @@ private fun Content(
 private fun FirstPageView(
    modifier: Modifier = Modifier,
 ) {
-   val state = rememberNestedHeaderState(debug = true)
+   val state = rememberNestedHeaderState(
+      initialOffset = -300f,
+      debug = true,
+   )
    NestedHeader(
       modifier = modifier.fillMaxSize(),
       state = state,
