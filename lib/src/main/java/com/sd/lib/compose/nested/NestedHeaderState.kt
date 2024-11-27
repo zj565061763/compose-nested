@@ -231,22 +231,22 @@ private inline fun NestedScrollDispatcher.dispatchScroll(
 }
 
 private fun Offset.consumedCoerceIn(available: Offset): Offset {
-   val legalX = x.consumedCoerceIn(available.x)
-   val legalY = y.consumedCoerceIn(available.y)
-   return if (x == legalX && y == legalY) {
+   val consumedX = x.consumedCoerceIn(available.x)
+   val consumedY = y.consumedCoerceIn(available.y)
+   return if (x == consumedX && y == consumedY) {
       this
    } else {
-      this.copy(x = legalX, y = legalY)
+      this.copy(x = consumedX, y = consumedY)
    }
 }
 
 private fun Velocity.consumedCoerceIn(available: Velocity): Velocity {
-   val legalX = x.consumedCoerceIn(available.x)
-   val legalY = y.consumedCoerceIn(available.y)
-   return if (x == legalX && y == legalY) {
+   val consumedX = x.consumedCoerceIn(available.x)
+   val consumedY = y.consumedCoerceIn(available.y)
+   return if (x == consumedX && y == consumedY) {
       this
    } else {
-      this.copy(x = legalX, y = legalY)
+      this.copy(x = consumedX, y = consumedY)
    }
 }
 
