@@ -12,7 +12,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -134,7 +133,7 @@ private fun HeaderBox(
       Modifier
          .headerGesture(state)
          .nestedScroll(
-            connection = object : NestedScrollConnection {},
+            connection = state.headerNestedScrollConnection,
             dispatcher = state.headerNestedScrollDispatcher,
          )
    } else {

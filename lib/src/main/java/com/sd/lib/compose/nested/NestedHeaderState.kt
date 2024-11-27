@@ -51,7 +51,9 @@ class NestedHeaderState internal constructor(
    internal var debug: Boolean = false
    internal lateinit var density: Density
 
+   internal val headerNestedScrollConnection = object : NestedScrollConnection {}
    internal val headerNestedScrollDispatcher = NestedScrollDispatcher()
+
    internal val contentNestedScrollConnection: NestedScrollConnection = NestedScrollConnectionY(
       onPreScroll = { value, _ ->
          dispatchHide(value)
