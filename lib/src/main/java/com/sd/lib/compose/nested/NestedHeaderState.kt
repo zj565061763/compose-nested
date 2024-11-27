@@ -151,6 +151,7 @@ class NestedHeaderState internal constructor(
       available: Float,
       source: NestedScrollSource,
    ) {
+      if (available == 0f) return
       headerNestedScrollDispatcher.dispatchScroll(
          available = Offset(0f, available),
          source = source,
