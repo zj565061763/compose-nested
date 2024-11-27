@@ -20,7 +20,6 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.input.pointer.util.VelocityTracker
 import androidx.compose.ui.input.pointer.util.addPointerInputChange
 import androidx.compose.ui.layout.SubcomposeLayout
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.constrainHeight
 import androidx.compose.ui.unit.constrainWidth
@@ -35,8 +34,6 @@ fun NestedHeader(
    header: @Composable () -> Unit,
    content: @Composable () -> Unit,
 ) {
-   state.density = LocalDensity.current
-
    SubcomposeLayout(modifier = modifier) { cs ->
       val headerPlaceable = (subcompose(SlotId.Header) {
          HeaderBox(
@@ -178,7 +175,7 @@ private fun Modifier.headerGesture(
          if (hasDrag && finishNormally) {
             val velocity = velocityTracker.calculateVelocity().y
             coroutineScope.launch {
-               state.dispatchFling(velocity)
+               state.dispatchFling(velocity, density = this@pointerInput)
             }
          }
 

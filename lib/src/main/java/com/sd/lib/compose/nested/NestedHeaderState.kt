@@ -49,8 +49,6 @@ class NestedHeaderState internal constructor(
    private var _contentFlingJob: Job? = null
 
    internal var debug: Boolean = false
-   internal lateinit var density: Density
-
    internal val headerNestedScrollConnection = object : NestedScrollConnection {}
    internal val headerNestedScrollDispatcher = NestedScrollDispatcher()
 
@@ -100,7 +98,7 @@ class NestedHeaderState internal constructor(
       return false
    }
 
-   internal suspend fun dispatchFling(velocity: Float) {
+   internal suspend fun dispatchFling(velocity: Float, density: Density) {
       if (!isReady) return
       if (velocity.absoluteValue < 300) return
 
