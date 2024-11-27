@@ -147,13 +147,13 @@ internal class NestedHeaderState(
    }
 
    fun cancelFling(): Boolean {
-      val fling = _flingJob ?: return false
-      return fling.isActive.also { isActive ->
+      val job = _flingJob ?: return false
+      _flingJob = null
+      return job.isActive.also { isActive ->
          if (isActive) {
             logMsg(debug) { "fling cancel" }
-            fling.cancel()
+            job.cancel()
          }
-         _flingJob = null
       }
    }
 
