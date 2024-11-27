@@ -130,7 +130,7 @@ private fun HeaderBox(
    state: NestedHeaderState,
    header: @Composable () -> Unit,
 ) {
-   val headerModifier = if (state.isReady) {
+   val modifier = if (state.isReady) {
       Modifier
          .headerGesture(state = state)
          .nestedScroll(
@@ -141,7 +141,7 @@ private fun HeaderBox(
       Modifier
    }
 
-   Box(modifier = headerModifier) {
+   Box(modifier = modifier) {
       header()
    }
 }
