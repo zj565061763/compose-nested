@@ -124,7 +124,7 @@ class NestedHeaderState internal constructor(
             lastValue = value
             dispatchNestedScroll(
                available = delta,
-               source = NestedScrollSource.Fling,
+               source = NestedScrollSource.SideEffect,
             )
          }
       }
