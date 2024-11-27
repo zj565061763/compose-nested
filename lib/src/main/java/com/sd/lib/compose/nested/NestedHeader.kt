@@ -105,28 +105,6 @@ private enum class SlotId {
 }
 
 @Composable
-private fun HeaderBox(
-   state: NestedHeaderState,
-   debug: Boolean,
-   header: @Composable () -> Unit,
-) {
-   val headerModifier = if (state.isReady) {
-      Modifier
-         .headerGesture(state = state, debug = debug)
-         .nestedScroll(
-            connection = object : NestedScrollConnection {},
-            dispatcher = state.headerNestedScrollDispatcher,
-         )
-   } else {
-      Modifier
-   }
-
-   Box(modifier = headerModifier) {
-      header()
-   }
-}
-
-@Composable
 private fun ContentBox(
    state: NestedHeaderState,
    content: @Composable () -> Unit,
@@ -153,6 +131,28 @@ private fun ContentBox(
          }
    ) {
       content()
+   }
+}
+
+@Composable
+private fun HeaderBox(
+   state: NestedHeaderState,
+   debug: Boolean,
+   header: @Composable () -> Unit,
+) {
+   val headerModifier = if (state.isReady) {
+      Modifier
+         .headerGesture(state = state, debug = debug)
+         .nestedScroll(
+            connection = object : NestedScrollConnection {},
+            dispatcher = state.headerNestedScrollDispatcher,
+         )
+   } else {
+      Modifier
+   }
+
+   Box(modifier = headerModifier) {
+      header()
    }
 }
 
