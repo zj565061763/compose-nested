@@ -173,39 +173,6 @@ class NestedHeaderState internal constructor(
    }
 }
 
-private class NestedScrollConnectionY(
-   val onPreScroll: (Float, NestedScrollSource) -> Boolean,
-   val onPostScroll: (Float, NestedScrollSource) -> Boolean,
-   val onPreFling: suspend (Float) -> Boolean,
-) : NestedScrollConnection {
-   override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
-      val y = available.y
-      return if (onPreScroll(y, source)) {
-         Offset(x = 0f, y = y)
-      } else {
-         super.onPreScroll(available, source)
-      }
-   }
-
-   override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
-      val y = available.y
-      return if (onPostScroll(y, source)) {
-         Offset(x = 0f, y = y)
-      } else {
-         super.onPostScroll(consumed, available, source)
-      }
-   }
-
-   override suspend fun onPreFling(available: Velocity): Velocity {
-      val y = available.y
-      return if (onPreFling(y)) {
-         Velocity(x = 0f, y = y)
-      } else {
-         super.onPreFling(available)
-      }
-   }
-}
-
 private inline fun NestedScrollDispatcher.dispatchScroll(
    available: Offset,
    source: NestedScrollSource,
@@ -255,6 +222,39 @@ private fun Float.consumedCoerceIn(available: Float): Float {
       available > 0f -> coerceIn(0f, available)
       available < 0f -> coerceIn(available, 0f)
       else -> 0f
+   }
+}
+
+private class NestedScrollConnectionY(
+   val onPreScroll: (Float, NestedScrollSource) -> Boolean,
+   val onPostScroll: (Float, NestedScrollSource) -> Boolean,
+   val onPreFling: suspend (Float) -> Boolean,
+) : NestedScrollConnection {
+   override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+      val y = available.y
+      return if (onPreScroll(y, source)) {
+         Offset(x = 0f, y = y)
+      } else {
+         super.onPreScroll(available, source)
+      }
+   }
+
+   override fun onPostScroll(consumed: Offset, available: Offset, source: NestedScrollSource): Offset {
+      val y = available.y
+      return if (onPostScroll(y, source)) {
+         Offset(x = 0f, y = y)
+      } else {
+         super.onPostScroll(consumed, available, source)
+      }
+   }
+
+   override suspend fun onPreFling(available: Velocity): Velocity {
+      val y = available.y
+      return if (onPreFling(y)) {
+         Velocity(x = 0f, y = y)
+      } else {
+         super.onPreFling(available)
+      }
    }
 }
 
