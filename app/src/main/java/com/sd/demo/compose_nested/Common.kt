@@ -2,6 +2,9 @@ package com.sd.demo.compose_nested
 
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
@@ -65,6 +68,42 @@ fun HorizontalListView(
             Text(text = index.toString())
          }
       }
+   }
+}
+
+@Composable
+fun TestHeaderView(
+   modifier: Modifier = Modifier,
+) {
+   Column(modifier = modifier.fillMaxWidth()) {
+      Box(
+         modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+            .background(Color.Red)
+            .clickable {
+               logMsg { "click Red" }
+            }
+      )
+
+      HorizontalListView()
+
+      Box(
+         modifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp)
+            .background(Color.Green)
+      )
+
+      Box(
+         modifier = Modifier
+            .fillMaxWidth()
+            .height(500.dp)
+            .background(Color.Blue)
+            .clickable {
+               logMsg { "click Blue" }
+            }
+      )
    }
 }
 

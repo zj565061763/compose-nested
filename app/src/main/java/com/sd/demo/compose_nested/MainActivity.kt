@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
                listActivity = listOf(
                   Sample::class.java,
                   SampleShortHeader::class.java,
+                  SampleInHorizontalPager::class.java,
                ),
                onClickActivity = {
                   startActivity(Intent(this, it))

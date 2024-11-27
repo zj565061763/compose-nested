@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -45,12 +46,12 @@ private fun Content(
 private fun HeaderView(
    modifier: Modifier = Modifier,
 ) {
-   Column(
-      modifier = modifier
-         .fillMaxWidth()
-         .height(300.dp)
-         .background(Color.Red)
-   ) {
-
+   Column(modifier = modifier.fillMaxWidth()) {
+      Box(
+         modifier = Modifier
+            .fillMaxWidth()
+            .height(300.dp)
+            .background(Color.Red)
+      )
    }
 }

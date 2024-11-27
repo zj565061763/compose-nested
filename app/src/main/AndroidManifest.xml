@@ -24,6 +24,7 @@
 
         <activity android:name=".Sample" />
         <activity android:name=".SampleShortHeader" />
+        <activity android:name=".SampleInHorizontalPager" />
 
     </application>
 
