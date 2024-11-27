@@ -260,6 +260,6 @@ private class NestedScrollConnectionY(
 
 internal inline fun NestedHeaderState.logMsg(block: () -> String) {
    if (debug) {
-      Log.i("FNestedHeader", block())
+      Log.d("NestedHeader", block())
    }
 }

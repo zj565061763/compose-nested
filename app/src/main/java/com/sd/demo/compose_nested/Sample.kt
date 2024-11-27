@@ -18,7 +18,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_nested.ui.theme.AppTheme
-import com.sd.lib.compose.nested.FNestedHeader
+import com.sd.lib.compose.nested.NestedHeader
 import com.sd.lib.compose.nested.rememberNestedHeaderState
 
 class Sample : ComponentActivity() {
@@ -58,7 +58,7 @@ private fun FirstPageView(
    modifier: Modifier = Modifier,
 ) {
    val state = rememberNestedHeaderState(debug = true)
-   FNestedHeader(
+   NestedHeader(
       modifier = modifier.fillMaxSize(),
       state = state,
       header = { HeaderView() }

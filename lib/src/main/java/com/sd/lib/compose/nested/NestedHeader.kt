@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 
 @Composable
-fun FNestedHeader(
+fun NestedHeader(
    modifier: Modifier = Modifier,
    state: NestedHeaderState = rememberNestedHeaderState(),
    header: @Composable () -> Unit,
