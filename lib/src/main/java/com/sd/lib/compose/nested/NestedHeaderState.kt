@@ -41,10 +41,10 @@ class NestedHeaderState internal constructor(
 
    var offset by mutableFloatStateOf(initialOffset)
 
-   private var _minOffset: Float = 0f
-   private val _maxOffset: Float = 0f
+   private val _anim = Animatable(0f)
+   private var _minOffset = 0f
+   private val _maxOffset = 0f
 
-   private val _animFling = Animatable(0f)
    private var _flingJob: Job? = null
    private var _contentFlingJob: Job? = null
 
@@ -115,11 +115,11 @@ class NestedHeaderState internal constructor(
       logMsg { "fling preConsumed:${preConsumed.y} left:${left.y} $uuid" }
 
       if (left != Velocity.Zero) {
-         _animFling.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
-         _animFling.snapTo(offset)
+         _anim.updateBounds(lowerBound = _minOffset, upperBound = _maxOffset)
+         _anim.snapTo(offset)
 
-         var lastValue = _animFling.value
-         _animFling.animateDecay(
+         var lastValue = _anim.value
+         _anim.animateDecay(
             initialVelocity = left.y,
             animationSpec = splineBasedDecay(density),
          ) {
