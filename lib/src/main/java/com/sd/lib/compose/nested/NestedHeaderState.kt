@@ -7,7 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -25,7 +26,7 @@ fun rememberNestedHeaderState(
    initialOffset: Float = 0f,
    debug: Boolean = false,
 ): NestedHeaderState {
-   return remember {
+   return rememberSaveable(saver = NestedHeaderState.Saver) {
       NestedHeaderState(initialOffset = initialOffset)
    }.also {
       it.debug = debug
@@ -170,6 +171,13 @@ class NestedHeaderState internal constructor(
             job.cancel()
          }
       }
+   }
+
+   companion object {
+      internal val Saver = listSaver(
+         save = { listOf(it.offset) },
+         restore = { NestedHeaderState(initialOffset = it[0]) }
+      )
    }
 }
 
