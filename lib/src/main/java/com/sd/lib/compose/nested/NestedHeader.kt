@@ -153,7 +153,6 @@ private fun Modifier.headerGesture(
          state.logMsg { "header start hasDrag:${hasDrag}" }
          velocityTracker.resetTracking()
 
-         // finishNormally，true表示正常结束，false表示取消
          val finishNormally = drag(down.id) { input ->
             val pan = input.positionChange()
 

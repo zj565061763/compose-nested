@@ -103,10 +103,10 @@ class NestedHeaderState internal constructor(
       if (!isReady) return
       if (velocity.absoluteValue < 300) return
 
-      _flingJob = currentCoroutineContext()[Job]
-
       val uuid = if (debug) UUID.randomUUID().toString() else ""
       logMsg { "fling start velocity:${velocity} $uuid" }
+
+      _flingJob = currentCoroutineContext()[Job]
 
       val available = Velocity(0f, velocity)
       val preConsumed = headerNestedScrollDispatcher.dispatchPreFling(available).consumedCoerceIn(available)
