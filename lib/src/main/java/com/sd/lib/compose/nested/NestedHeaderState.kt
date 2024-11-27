@@ -108,7 +108,9 @@ class NestedHeaderState internal constructor(
 
    internal suspend fun dispatchFling(velocity: Float, density: Density) {
       if (!isReady) return
-      if (velocity.absoluteValue < 300) return
+
+      @Suppress("NAME_SHADOWING")
+      val velocity = velocity.takeIf { it.absoluteValue > 300 } ?: 0f
 
       val uuid = if (debug) UUID.randomUUID().toString() else ""
       logMsg { "fling start velocity:${velocity} $uuid" }
