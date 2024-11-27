@@ -66,9 +66,6 @@ class NestedHeaderState internal constructor(
    )
 
    internal fun setSize(header: Int, content: Int, container: Int) {
-      logMsg { "setSize header:${header} content:${content} container:${container}" }
-      isReady = header > 0
-
       _minOffset = if (content < container) {
          val bottom = header + content
          val delta = container - bottom
@@ -77,10 +74,16 @@ class NestedHeaderState internal constructor(
          -header.toFloat()
       }
 
+      logMsg {
+         "setSize header:${header} content:${content} container:${container} minOffset:${_minOffset}"
+      }
+
       initialOffset?.also {
          initialOffset = null
          offset = it.coerceIn(_minOffset, _maxOffset)
       }
+
+      isReady = header > 0
    }
 
    private fun scrollToHide(value: Float): Boolean {
