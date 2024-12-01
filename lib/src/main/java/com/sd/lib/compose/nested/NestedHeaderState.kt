@@ -65,6 +65,12 @@ class NestedHeaderState internal constructor(
       }
    )
 
+   fun hideHeader() {
+      cancelFling()
+      cancelContentFling()
+      offset = _minOffset
+   }
+
    internal fun setSize(header: Int, content: Int, container: Int) {
       _minOffset = if (content < container) {
          val bottom = header + content
