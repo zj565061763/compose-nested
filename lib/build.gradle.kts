@@ -6,7 +6,7 @@ plugins {
 
 val libGroupId = "com.sd.lib.android"
 val libArtifactId = "compose-nested"
-val libVersion = "1.0.0-alpha10"
+val libVersion = "1.0.0-alpha11"
 
 android {
    namespace = "com.sd.lib.compose.nested"
